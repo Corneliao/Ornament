@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Resource/font/PICOSC Harmony Manrope-VF.ttf</file>
+        <file>Resource/ico/IconamoonClose.png</file>
+        <file>Resource/ico/MajesticonsEyeOff.png</file>
+        <file>Resource/ico/MajesticonsLock.png</file>
+        <file>Resource/ico/MingcuteUser2Fill.png</file>
+        <file>Resource/ico/TablerBrandUnity.png</file>
+        <file>Resource/ico/IconamoonArrowDown2Bold.png</file>
+        <file>Resource/ico/IconamoonArrowUp2Bold.png</file>
+        <file>Resource/ico/MingcuteMinimizeLine.png</file>
+        <file>Resource/ico/FluentMaximize16Regular.png</file>
+        <file>Resource/ico/TwemojiGreenCircle.png</file>
+        <file>Resource/ico/TwemojiRedCircle.png</file>
+        <file>Resource/ico/RiNotification3Line.png</file>
+        <file>Resource/ico/RiSearchLine.png</file>
+        <file>Resource/ico/invite.png</file>
+        <file>Resource/ico/RiMessage3Fill.png</file>
+        <file>Resource/ico/RiMessage3Line.png</file>
+        <file>Resource/ico/friendIco.png</file>
+        <file>Resource/ico/friendIco_fill.png</file>
+        <file>Resource/ico/TablerBrandUnity_empty.png</file>
+    </qresource>
+</RCC>
