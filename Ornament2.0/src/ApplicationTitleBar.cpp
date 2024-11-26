@@ -6,6 +6,7 @@ ApplicationTitleBar::ApplicationTitleBar(QWidget* parent)
 	this->dpi = this->devicePixelRatioF();
 
 	QHBoxLayout* main_lay = new QHBoxLayout(this);
+	main_lay->setContentsMargins(25, 11, 25, 11);
 	this->setLayout(main_lay);
 
 	this->window_ico = new QLabel(this);
@@ -32,10 +33,12 @@ ApplicationTitleBar::ApplicationTitleBar(QWidget* parent)
 	this->online_status = new OnlineStatus(this);
 
 	this->search = new QLabel(this);
+	this->search->setCursor(Qt::PointingHandCursor);
 	this->search->setFixedSize(18, 18);
 	this->search->setScaledContents(true);
 	pixmap.load(":/Resource/ico/RiSearchLine.png");
 	this->search->setPixmap(pixmap);
+	this->search->installEventFilter(this);
 
 	this->notification = new QLabel(this);
 	this->notification->setFixedSize(18, 18);
@@ -117,14 +120,20 @@ bool ApplicationTitleBar::eventFilter(QObject* target, QEvent* event)
 			return true;
 		}
 	}
+	if (target == this->search) {
+		if (event->type() == QEvent::MouseButtonPress) {
+			emit this->showAddFriendSignal();
+			return true;
+		}
+	}
 	return QWidget::eventFilter(target, event);
 }
 
 void ApplicationTitleBar::paintEvent(QPaintEvent*)
 {
-	QPainter painter(this);
+	/*QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setPen(QPen(Qt::lightGray, 0.4));
 	painter.setBrush(Qt::NoBrush);
-	painter.drawLine(QPoint(this->rect().bottomLeft()), QPoint(this->rect().bottomRight()));
+	painter.drawLine(QPoint(this->rect().bottomLeft()), QPoint(this->rect().bottomRight()));*/
 }

@@ -22,25 +22,8 @@ ApplicationFeaureBar::ApplicationFeaureBar(QWidget* parent)
 ApplicationFeaureBar::~ApplicationFeaureBar()
 {
 }
-
 void ApplicationFeaureBar::paintEvent(QPaintEvent*)
 {
-}
-
-bool ApplicationFeaureBar::eventFilter(QObject* target, QEvent* event)
-{
-	if (target == this->addfriend_button) {
-		if (event->type() == QEvent::MouseButtonPress) {
-			if (this->addFriend) {
-				this->addFriend->raise();
-				return true;
-			}
-			this->addFriend = new AddFriend();
-			this->addFriend->show();
-			return true;
-		}
-	}
-	return QWidget::eventFilter(target, event);
 }
 
 void ApplicationFeaureBar::increaseFeature(const QString& normal_ico, const QString& select_ico, const QString& ico_text)

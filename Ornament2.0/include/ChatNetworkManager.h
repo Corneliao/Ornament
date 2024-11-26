@@ -7,12 +7,15 @@
 class ChatNetworkManager : public QObject
 {
 	Q_OBJECT
-		enum MSGTYPE { SignIn = 0, NormalMessage, CronyApplication, updateCronyList };
+		enum MSGTYPE { Login = 0, NormalMessage, CronyApplication, updateCronyList };
 public:
 	ChatNetworkManager(QObject* parent = Q_NULLPTR);
 	~ChatNetworkManager();
 public:
 	void initializeSocket();
+	void sendApplication(const QString& receiver);
+private:
+	void sendLoginInfo();
 private:
 	QTcpSocket* socket = Q_NULLPTR;
 signals:

@@ -37,4 +37,5 @@ private:
 	AddFriend* add_friend = Q_NULLPTR;
 signals:
 	void showToolSignal();
+	void showAddFriendSignal();
 };

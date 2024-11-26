@@ -38,12 +38,16 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	this->tool->setGeometry(QRect(QPoint(this->rect().right() - (this->tool->width() + 20), this->rect().top() + 70), QSize(this->tool->size())));
 	this->tool->hide();
 
+	//this->addFriend = new AddFriend();
+	//this->addFriend->setGeometry(QRect(this->rect().center().x() - (this->addFriend->width() / 2), this->rect().top() + 80, this->addFriend->width(), this->addFriend->height()));
+
 	connect(this->application_title_Bar, &ApplicationTitleBar::showToolSignal, this, &Ornament::showTool, Qt::DirectConnection);
 	connect(this, &Ornament::ToolStateSignal, this->application_title_Bar, &ApplicationTitleBar::setUnfoldIcon, Qt::DirectConnection);
 	connect(this->tool, &TitleTool::minWindowSignal, this, &Ornament::showMinimized, Qt::DirectConnection);
 	connect(this->tool, &TitleTool::maxWindowSignal, this, &Ornament::maxWindowSlot, Qt::DirectConnection);
 	connect(this->tool, &TitleTool::closeWindowSignal, this, &Ornament::close, Qt::DirectConnection);
 	connect(this->application_feature_Bar, &ApplicationFeaureBar::indexChanged, this->stack_layout, &QStackedLayout::setCurrentIndex, Qt::DirectConnection);
+	connect(this->application_title_Bar, &ApplicationTitleBar::showAddFriendSignal, this, &Ornament::showAddFriend, Qt::DirectConnection);
 
 	qDebug() << "主线程" << QThread::currentThreadId();
 	//连接服务器
@@ -53,27 +57,12 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	connect(this->chat_thread, &QThread::started, this->chat_network_manager, &ChatNetworkManager::initializeSocket, Qt::DirectConnection);
 	this->chat_thread->start();
 	connect(this->chat_network_manager, &ChatNetworkManager::connectedSignal, this, &Ornament::startSqlThread, Qt::QueuedConnection);
+	connect(this->chat_network_manager, &ChatNetworkManager::connecterrorSignal, this, &Ornament::deleteChatThread, Qt::QueuedConnection);
 }
 
 Ornament::~Ornament()
 {
-	if (this->chat_thread != Q_NULLPTR) {
-		this->chat_thread->quit();
-		this->chat_thread->wait();
-		delete this->chat_thread;
-		this->chat_thread = Q_NULLPTR;
-		delete this->chat_network_manager;
-		this->chat_network_manager = Q_NULLPTR;
-
-		if (this->sql_thread != Q_NULLPTR) {
-			this->sql_thread->quit();
-			this->sql_thread->wait();
-			delete this->sql_thread;
-			this->sql_thread = Q_NULLPTR;
-			delete this->userDataBase;
-			this->userDataBase = Q_NULLPTR;
-		}
-	}
+	this->deleteChatThread();
 }
 
 void Ornament::startSqlThread()
@@ -85,6 +74,33 @@ void Ornament::startSqlThread()
 	this->userDataBase->moveToThread(this->sql_thread);
 	connect(this->sql_thread, &QThread::started, this->userDataBase, &UserDatabaseManager::iniSql, Qt::DirectConnection);
 	this->sql_thread->start();
+	connect(this->userDataBase, &UserDatabaseManager::SearchFriendDataSignal, this, &Ornament::SearchFriendDataSignal, Qt::QueuedConnection);
+	connect(this, &Ornament::searchFriendSignal, this->userDataBase, &UserDatabaseManager::selectUserDataForSearch, Qt::QueuedConnection);
+	connect(this, &Ornament::SendFriendApplication, this->userDataBase, &UserDatabaseManager::increaseUserApplicationTemp, Qt::QueuedConnection);
+	connect(this->userDataBase, &UserDatabaseManager::SendApplicationToServer, this->chat_network_manager, &ChatNetworkManager::sendApplication, Qt::DirectConnection);
+}
+
+void Ornament::deleteChatThread()
+{
+	if (this->chat_thread != Q_NULLPTR) {
+		this->chat_network_manager->deleteLater();
+		this->chat_network_manager = Q_NULLPTR;
+
+		this->chat_thread->quit();
+		this->chat_thread->wait();
+		this->chat_thread->deleteLater();
+		this->chat_thread = Q_NULLPTR;
+
+		if (this->sql_thread != Q_NULLPTR) {
+			this->userDataBase->deleteLater();
+			this->userDataBase = Q_NULLPTR;
+
+			this->sql_thread->quit();
+			this->sql_thread->wait();
+			this->sql_thread->deleteLater();
+			this->sql_thread = Q_NULLPTR;
+		}
+	}
 }
 
 void Ornament::resizeEvent(QResizeEvent* event)
@@ -94,6 +110,24 @@ void Ornament::resizeEvent(QResizeEvent* event)
 	this->tool->setGeometry(QRect(QPoint(this->rect().right() - (this->tool->width() + 20), this->rect().top() + 70), QSize(this->tool->size())));
 }
 
+bool Ornament::eventFilter(QObject* target, QEvent* event)
+{
+	return false;
+}
+
+void Ornament::showEvent(QShowEvent*)
+{
+	HWND hCurWnd = GetForegroundWindow();
+	DWORD dwMyID = GetCurrentThreadId();
+	DWORD dwCurID = GetWindowThreadProcessId(hCurWnd, NULL);
+	AttachThreadInput(dwCurID, dwMyID, TRUE);
+	SetForegroundWindow((HWND)winId());
+	AttachThreadInput(dwCurID, dwMyID, FALSE);
+	SwitchToThisWindow((HWND)winId(), TRUE);
+	SetActiveWindow((HWND)winId());
+	this->setFocus();
+}
+
 void Ornament::showTool()
 {
 	this->tool->isHidden() ? this->tool->show() : this->tool->hide();
@@ -101,6 +135,16 @@ void Ornament::showTool()
 		emit this->ToolStateSignal(false);
 	else
 		emit this->ToolStateSignal(true);
+}
+
+void Ornament::showAddFriend()
+{
+	this->addFriend = new AddFriend();
+	this->addFriend->move(600, (screenSize.height() - this->addFriend->height()) / 2);
+	connect(this->addFriend, &AddFriend::searchFriendSignal, this, &Ornament::searchFriendSignal, Qt::DirectConnection);
+	connect(this, &Ornament::SearchFriendDataSignal, this->addFriend, &AddFriend::increaseSearchMember, Qt::DirectConnection);
+	connect(this->addFriend, &AddFriend::sendFriendApplication, this, &Ornament::SendFriendApplication, Qt::DirectConnection);
+	this->addFriend->exec();
 }
 
 void Ornament::maxWindowSlot()

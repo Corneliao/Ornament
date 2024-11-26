@@ -20,5 +20,8 @@
         <file>Resource/ico/friendIco.png</file>
         <file>Resource/ico/friendIco_fill.png</file>
         <file>Resource/ico/TablerBrandUnity_empty.png</file>
+        <file>Resource/ico/IconamoonSearch.png</file>
+        <file>Resource/ico/correct.png</file>
+        <file>Resource/ico/fail.png</file>
     </qresource>
 </RCC>

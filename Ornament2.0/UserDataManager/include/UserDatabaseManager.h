@@ -6,6 +6,7 @@
 #include <QThread>
 #include <QSqlError>
 #include <QTimer>
+#include <QRandomGenerator>
 #include "../../global.h"
 #include "../../Component/include/RoundImage.h"
 class UserDatabaseManager : public QObject
@@ -17,9 +18,14 @@ public:
 	~UserDatabaseManager();
 public:
 	void iniSql();
-	void selectUserData(const QString& userAccount);
+	void selectUserHeadData(const QString& userAccount);
 	void closeDatabase();
 	void VerifyUserAcocunt(const QString& userAccount, const  QString& userPassword);
+	bool isExistTheSameUserAccount(const int account);
+	void RegisterUserAccount(const QByteArray& imageBytes, const QString& userName, const QString& userPassword);
+	void selectUserDataForSearch(const QString& userAccount);
+	bool isExistTheSameUserApplication(const QString& receiver);
+	void increaseUserApplicationTemp(const QString& receiver);
 protected:
 private:
 	QString connectName = "connected_forlogin";
@@ -30,6 +36,10 @@ signals:
 	void VerifySucceed(const QPixmap& userhead_pixmap, const QByteArray& imagebytes, const QString& userName, const  int& userAccount);
 	void VerifyFailed(bool flag);
 	void UnValidUserAccount(bool enable);
+	void RegisterSucceedSignal(const int& account);
+	void SearchFriendDataSignal(const SearchFriendData& data);
+	void SendApplicationToServer(const QString& receiver);
+	void SendApplicationSucceedSignal();
 private:
 	QPixmap pixmap_temp;
 };

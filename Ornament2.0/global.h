@@ -8,6 +8,7 @@ extern bool GLOB_IsConnectedMysql;
 extern bool GLOB_IsConnectedServer;
 extern int GLOB_UserAccount;
 extern QString GLOB_UserName;
+extern QSize screenSize;
 //extern QPixmap GLOB_UserHead;
 
 struct FeatureBarData {
@@ -27,4 +28,10 @@ struct FriendChatData {
 	QPixmap userHead;
 	QString userName;
 	QString userMessage;
+};
+struct SearchFriendData {
+	QByteArray imagebytes;
+	QString userName;
+	bool status;
+	QString userAccount;
 };

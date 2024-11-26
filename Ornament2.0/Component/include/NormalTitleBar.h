@@ -6,17 +6,18 @@
 #include <QEvent>
 #include <QPainter>
 #include "../../global.h"
-class LoginTitleBar : public QWidget
+class NormalTitleBar : public QWidget
 {
 	Q_OBJECT
 
 public:
-	LoginTitleBar(QWidget* parent);
-	~LoginTitleBar();
+	NormalTitleBar(const QString& text = "", QWidget* parent = Q_NULLPTR);
+	~NormalTitleBar();
 protected:
 	bool eventFilter(QObject* target, QEvent* event)Q_DECL_OVERRIDE;
 private:
 	QLabel* close_window = Q_NULLPTR;
+	QLabel* title = Q_NULLPTR;
 signals:
 	void closeWindowSignal();
 };

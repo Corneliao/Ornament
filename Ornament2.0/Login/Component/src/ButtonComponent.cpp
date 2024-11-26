@@ -27,3 +27,8 @@ void ButtonComponent::paintEvent(QPaintEvent*)
 	painter.setBrush(this->backgroundColor);
 	painter.drawRoundedRect(this->rect(), 10, 10);
 }
+
+void ButtonComponent::showEvent(QShowEvent*)
+{
+	emit this->showed();
+}

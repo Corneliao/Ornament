@@ -20,7 +20,6 @@ public:
 	~ApplicationFeaureBar();
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
-	bool eventFilter(QObject* target, QEvent* event) Q_DECL_OVERRIDE;
 private:
 	void increaseFeature(const QString& normal_ico, const QString& select_ico, const QString& ico_text);
 	void dealFeatureButtonClicked(const int index);

@@ -6,14 +6,16 @@
 #include <QThread>
 #include <QPainter>
 #include <QEvent>
+#include <QPropertyAnimation>
 #include "../../FramelessWindow/include/framelesswindow.h"
 #include "../../global.h"
-#include"LoginTitleBar.h"
+#include"../../Component/include/NormalTitleBar.h"
 #include "../../UserDataManager/include/UserDatabaseManager.h"
 #include "../Component/include/LineEditComponent.h"
 #include "../../Component/include/RoundImage.h"
 #include "../Component/include/ButtonComponent.h"
 #include "../Register/include/RegisterUserAccount.h"
+
 class Login : public FramelessWindow
 {
 	Q_OBJECT
@@ -27,8 +29,10 @@ protected:
 	QPixmap setPixmapDpi(const QSize& size, const QPixmap& pixmap);
 	bool eventFilter(QObject* target, QEvent* event)Q_DECL_OVERRIDE;
 	void deleteRegisterWindow();
+	void closeEvent(QCloseEvent*)Q_DECL_OVERRIDE;
+	void deleteSqlThread();
 private:
-	LoginTitleBar* login_title_Bar = Q_NULLPTR;
+	NormalTitleBar* login_title_Bar = Q_NULLPTR;
 	QLabel* userHead = Q_NULLPTR;
 	UserDatabaseManager* userDatabase = Q_NULLPTR;
 	QThread* sql_thread = Q_NULLPTR;
@@ -38,6 +42,8 @@ private:
 	ButtonComponent* loginButton = Q_NULLPTR;
 	QLabel* registerButton = Q_NULLPTR;
 	RegisterUserAccount* registerUserAccount = Q_NULLPTR;
+	QPropertyAnimation* login_button_animation = Q_NULLPTR;
+	bool isLogining = false;
 signals:
 	void startloginAccountSignal(const QString& userAccount, const QString& password);
 	//	void VerifySucceed(const QByteArray& imagebytes, const QString& userName, const  int& userAccount);
