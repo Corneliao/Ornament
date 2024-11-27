@@ -7,7 +7,7 @@ UserDatabaseManager::UserDatabaseManager(const QString& connect_name)
 
 UserDatabaseManager::~UserDatabaseManager()
 {
-	qDebug() << "do work deleter";
+	qDebug() << __FUNCTION__ << __TIME__ << "do work deleter";
 	this->closeDatabase();
 }
 
@@ -19,7 +19,6 @@ void UserDatabaseManager::closeDatabase()
 		db.close();
 	}
 	QSqlDatabase::removeDatabase(this->connectName);
-	//emit this->closedDatabaseSignal();
 }
 
 void UserDatabaseManager::VerifyUserAcocunt(const QString& userAccount, const QString& userPassword)
@@ -50,7 +49,7 @@ void UserDatabaseManager::VerifyUserAcocunt(const QString& userAccount, const QS
 			emit this->UnValidUserAccount(true);
 		}
 		else {
-			qDebug() << "语句错误";
+			emit this->UnValidUserAccount(true);
 		}
 	}
 }
@@ -70,7 +69,7 @@ bool UserDatabaseManager::isExistTheSameUserAccount(const int account)
 			return false;
 		}
 		else {
-			qDebug() << query.lastError();
+			qDebug() << __FUNCTION__ << __TIME__ << query.lastError();
 			return false;
 		}
 	}
@@ -128,16 +127,15 @@ void  UserDatabaseManager::selectUserDataForSearch(const QString& userAccount)
 
 bool UserDatabaseManager::isExistTheSameUserApplication(const QString& receiver)
 {
-	{
-		QSqlDatabase db = QSqlDatabase::database(this->connectName);
-		QSqlQuery query(db);
-		query.prepare("SELECT receiverAccount From CronyApplicationTemp WHERE senderAccount = " + QString::number(GLOB_UserAccount));
-		if (query.exec()) {
-			while (query.next()) {
-				QString _account = query.value(0).toString();
-				if (_account == receiver)
-					return true;
-			}
+	//查询是否已存在好友申请
+	QSqlDatabase db = QSqlDatabase::database(this->connectName);
+	QSqlQuery query(db);
+	query.prepare("SELECT receiverAccount From CronyApplicationTemp WHERE senderAccount = " + QString::number(GLOB_UserAccount));
+	if (query.exec()) {
+		while (query.next()) {
+			QString _account = query.value(0).toString();
+			if (_account == receiver)
+				return true;
 		}
 	}
 	return false;
@@ -145,26 +143,46 @@ bool UserDatabaseManager::isExistTheSameUserApplication(const QString& receiver)
 
 void UserDatabaseManager::increaseUserApplicationTemp(const QString& receiver)
 {
-	qDebug() << "1";
-	{
-		bool  ret = this->isExistTheSameUserApplication(receiver);
-		if (!ret) {
-			QSqlDatabase db = QSqlDatabase::database(this->connectName);
-			QSqlQuery query(db);
-			query.prepare("INSERT INTO CronyApplicationTemp (senderAccount,receiverAccount) VALUES (:sender,:receiver);");
-			query.bindValue(":sender", GLOB_UserAccount);
-			query.bindValue(":receiver", receiver.toInt());
-			if (query.exec()) {
-				emit this->SendApplicationToServer(receiver);
-			}
-			else {
-				qDebug() << __FUNCTION__ << query.lastError();
-			}
+	//判断是否存在此好友
+	bool is_exist = this->isExistTheUser(receiver);
+	if (is_exist) {
+		emit this->existTheUserSignal();
+		return;
+	}
+
+	bool  ret = this->isExistTheSameUserApplication(receiver);
+	if (!ret) {
+		QSqlDatabase db = QSqlDatabase::database(this->connectName);
+		QSqlQuery query(db);
+		query.prepare("INSERT INTO CronyApplicationTemp (senderAccount,receiverAccount) VALUES (:sender,:receiver);");
+		query.bindValue(":sender", GLOB_UserAccount);
+		query.bindValue(":receiver", receiver.toInt());
+		if (query.exec()) {
+			emit this->isSendApplication(true);
+			emit this->SendApplicationToServer(receiver);
 		}
 		else {
-			qDebug() << "请勿重复发送好友申请";
+			qDebug() << __FUNCTION__ << __TIME__ << query.lastError();
 		}
 	}
+	else {
+		emit this->isSendApplication(false);
+	}
+}
+
+bool UserDatabaseManager::isExistTheUser(const QString& userAccount)
+{
+	QSqlDatabase db = QSqlDatabase::database(this->connectName);
+	QSqlQuery query(db);
+	query.prepare("SELECT cronyAccount FROM UserCrony WHERE userAccount = " + QString::number(GLOB_UserAccount));
+	if (query.exec()) {
+		while (query.next()) {
+			QString account = query.value(0).toString();
+			if (account == userAccount)
+				return true;
+		}
+	}
+	return false;
 }
 
 void UserDatabaseManager::iniSql()
@@ -177,12 +195,12 @@ void UserDatabaseManager::iniSql()
 	db.setDatabaseName("users");
 	db.setHostName("120.46.157.203");
 	if (db.open()) {
-		qInfo() << __FUNCTION__ << "打开数据库成功";
+		qInfo() << __FUNCTION__ << __TIME__ << "打开数据库成功";
 		GLOB_IsConnectedMysql = true;
 	}
 
 	else {
-		qDebug() << db.lastError();
+		qDebug() << __FUNCTION__ << __TIME__ << db.lastError();
 		return;
 	}
 }

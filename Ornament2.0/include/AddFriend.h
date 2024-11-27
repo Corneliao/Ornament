@@ -9,6 +9,7 @@
 #include <QGraphicsDropShadowEffect>
 #include <QLineEdit>
 #include <QTimeLine>
+#include <QTimer>
 #include "../Component/include/NormalTitleBar.h"
 #include "../FramelessWindow/include/framelesswindow.h"
 #include "../Component/include/LineEdit.h"
@@ -23,7 +24,8 @@ public:
 	AddFriend(QDialog* parent = Q_NULLPTR);
 	~AddFriend();
 	void increaseSearchMember(const SearchFriendData& data);
-	void addFriendButtonClicked();
+	void sendApplicationSucceedAnimation(bool isSucceed);
+	void ExistTheUser();
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 	void showEvent(QShowEvent*)Q_DECL_OVERRIDE;
@@ -31,6 +33,9 @@ protected:
 	void mousePressEvent(QMouseEvent* event)Q_DECL_OVERRIDE;
 	void mouseReleaseEvent(QMouseEvent* event)Q_DECL_OVERRIDE;
 	void mouseMoveEvent(QMouseEvent* event)Q_DECL_OVERRIDE;
+	void SearchBarTextEmpty();
+	void SizeAnimationFrameChanged(int frame);
+	void noticeAnimationTimerOut();
 private:
 	NormalTitleBar* titleBar = Q_NULLPTR;
 	QPropertyAnimation* sizeAnimation = Q_NULLPTR;
@@ -43,6 +48,7 @@ private:
 	QPoint m_offset;
 	SystemNotification* notification = Q_NULLPTR;
 	QPropertyAnimation* noticeAnimation = Q_NULLPTR;
+	QTimer* noticeBackTimer = Q_NULLPTR;
 signals:
 	void closeWindow();
 	void searchFriendSignal(const  QString& userAccount);

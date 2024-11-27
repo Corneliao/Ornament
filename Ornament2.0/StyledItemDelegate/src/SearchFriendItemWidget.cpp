@@ -55,6 +55,11 @@ SearchFriendItemWidget::~SearchFriendItemWidget()
 {
 }
 
+void SearchFriendItemWidget::ExistTheUser()
+{
+	this->button->hide();
+}
+
 bool SearchFriendItemWidget::eventFilter(QObject* target, QEvent* event)
 {
 	if (target == this->button) {

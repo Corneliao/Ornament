@@ -26,6 +26,7 @@ public:
 	void selectUserDataForSearch(const QString& userAccount);
 	bool isExistTheSameUserApplication(const QString& receiver);
 	void increaseUserApplicationTemp(const QString& receiver);
+	bool isExistTheUser(const QString& userAccount);
 protected:
 private:
 	QString connectName = "connected_forlogin";
@@ -39,7 +40,8 @@ signals:
 	void RegisterSucceedSignal(const int& account);
 	void SearchFriendDataSignal(const SearchFriendData& data);
 	void SendApplicationToServer(const QString& receiver);
-	void SendApplicationSucceedSignal();
+	void isSendApplication(bool isSucceed);
+	void existTheUserSignal();
 private:
 	QPixmap pixmap_temp;
 };

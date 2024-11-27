@@ -54,4 +54,6 @@ signals:
 	void searchFriendSignal(const QString& userAccount);
 	void SearchFriendDataSignal(const SearchFriendData& data);
 	void SendFriendApplication(const QString& receiverAccount);
+	void isSendApplication(bool isSucceed);
+	void existTheUserSignal();
 };

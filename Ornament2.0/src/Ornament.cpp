@@ -78,6 +78,8 @@ void Ornament::startSqlThread()
 	connect(this, &Ornament::searchFriendSignal, this->userDataBase, &UserDatabaseManager::selectUserDataForSearch, Qt::QueuedConnection);
 	connect(this, &Ornament::SendFriendApplication, this->userDataBase, &UserDatabaseManager::increaseUserApplicationTemp, Qt::QueuedConnection);
 	connect(this->userDataBase, &UserDatabaseManager::SendApplicationToServer, this->chat_network_manager, &ChatNetworkManager::sendApplication, Qt::DirectConnection);
+	connect(this->userDataBase, &UserDatabaseManager::isSendApplication, this, &Ornament::isSendApplication, Qt::QueuedConnection);
+	connect(this->userDataBase, &UserDatabaseManager::existTheUserSignal, this, &Ornament::existTheUserSignal, Qt::QueuedConnection);
 }
 
 void Ornament::deleteChatThread()
@@ -144,6 +146,8 @@ void Ornament::showAddFriend()
 	connect(this->addFriend, &AddFriend::searchFriendSignal, this, &Ornament::searchFriendSignal, Qt::DirectConnection);
 	connect(this, &Ornament::SearchFriendDataSignal, this->addFriend, &AddFriend::increaseSearchMember, Qt::DirectConnection);
 	connect(this->addFriend, &AddFriend::sendFriendApplication, this, &Ornament::SendFriendApplication, Qt::DirectConnection);
+	connect(this, &Ornament::isSendApplication, this->addFriend, &AddFriend::sendApplicationSucceedAnimation, Qt::DirectConnection);
+	connect(this, &Ornament::existTheUserSignal, this->addFriend, &AddFriend::ExistTheUser, Qt::DirectConnection);
 	this->addFriend->exec();
 }
 

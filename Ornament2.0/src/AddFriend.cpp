@@ -18,39 +18,23 @@ AddFriend::AddFriend(QDialog* parent)
 	this->notification->hide();
 
 	this->noticeAnimation = new QPropertyAnimation(this->notification, "geometry", this);
-	this->noticeAnimation->setDuration(1000);
+	this->noticeAnimation->setEasingCurve(QEasingCurve::InOutSine);
+	this->noticeAnimation->setDuration(500);
 
-	connect(this->search, &LineEdit::searchFriend, this, &AddFriend::searchFriend, Qt::DirectConnection);
-	connect(this->search, &LineEdit::textEmpty, this, [=]() {
-		if (this->height() <= 60)
-			return;
-		this->windowSizeAnimation->setDirection(QTimeLine::Backward);
-		this->windowSizeAnimation->stop();
-		this->windowSizeAnimation->start();
-
-		if (this->listWidget->count() != 0) {
-			for (int i = 0; i < this->listWidget->count(); i++) {
-				QListWidgetItem* item = this->listWidget->item(i);
-				if (item) {
-					SearchFriendItemWidget* itemWidget = qobject_cast<SearchFriendItemWidget*>(this->listWidget->itemWidget(item));
-					itemWidget->deleteLater();
-					itemWidget = Q_NULLPTR;
-				}
-				delete item;
-				item = Q_NULLPTR;
-			}
-		}
-		});
-	connect(this->search, &LineEdit::hideAddFriend, this, &AddFriend::deleteLater, Qt::DirectConnection);
+	this->noticeBackTimer = new QTimer(this);
+	this->noticeBackTimer->setInterval(1000);
+	this->noticeBackTimer->setSingleShot(true);
+	connect(this->noticeBackTimer, &QTimer::timeout, this, &AddFriend::noticeAnimationTimerOut, Qt::DirectConnection);
 
 	this->windowSizeAnimation = new QTimeLine(500, this);
 	this->windowSizeAnimation->setUpdateInterval(0);
 	this->windowSizeAnimation->setEasingCurve(QEasingCurve::InOutSine);
 	this->windowSizeAnimation->setFrameRange(60, 300);
 
-	connect(this->windowSizeAnimation, &QTimeLine::frameChanged, this, [=](int frame) {
-		this->setFixedSize(this->width(), frame);
-		});
+	connect(this->windowSizeAnimation, &QTimeLine::frameChanged, this, &AddFriend::SizeAnimationFrameChanged, Qt::DirectConnection);
+	connect(this->search, &LineEdit::searchFriend, this, &AddFriend::searchFriend, Qt::DirectConnection);
+	connect(this->search, &LineEdit::textEmpty, this, &AddFriend::SearchBarTextEmpty, Qt::DirectConnection);
+	connect(this->search, &LineEdit::hideAddFriend, this, &AddFriend::deleteLater, Qt::DirectConnection);
 }
 
 AddFriend::~AddFriend()
@@ -83,6 +67,37 @@ void AddFriend::increaseSearchMember(const SearchFriendData& data)
 	this->listWidget->addItem(item);
 	this->listWidget->setItemWidget(item, itemWidget);
 	connect(itemWidget, &SearchFriendItemWidget::SendFreindApplication, this, &AddFriend::sendFriendApplication, Qt::DirectConnection);
+	//connect(this, &AddFriend::existTheUserSignal, itemWidget, &SearchFriendItemWidget::ExistTheUser, Qt::DirectConnection);
+}
+
+void AddFriend::sendApplicationSucceedAnimation(bool isSucceed)
+{
+	if (isSucceed)
+		this->notification->setText("发送好友申请成功");
+
+	else
+		this->notification->setText("请勿重复发送好友申请");
+	this->noticeAnimation->setDirection(QPropertyAnimation::Forward);
+	this->noticeAnimation->setStartValue(QRect(QPoint(this->rect().center().x() - (this->notification->width() / 2), this->rect().top() - (this->notification->height())), QSize(this->notification->size())));
+	this->noticeAnimation->setEndValue(QRect(QPoint(this->rect().center().x() - (this->notification->width() / 2), this->rect().top() + 20), QSize(this->notification->size())));
+	this->noticeAnimation->stop();
+	this->noticeAnimation->start();
+	this->notification->show();
+	this->noticeBackTimer->stop();
+	this->noticeBackTimer->start();
+}
+
+void AddFriend::ExistTheUser()
+{
+	this->notification->setText("你已存在此好友，无需再次添加");
+	this->noticeAnimation->setDirection(QPropertyAnimation::Forward);
+	this->noticeAnimation->setStartValue(QRect(QPoint(this->rect().center().x() - (this->notification->width() / 2), this->rect().top() - (this->notification->height())), QSize(this->notification->size())));
+	this->noticeAnimation->setEndValue(QRect(QPoint(this->rect().center().x() - (this->notification->width() / 2), this->rect().top() + 20), QSize(this->notification->size())));
+	this->noticeAnimation->stop();
+	this->noticeAnimation->start();
+	this->notification->show();
+	this->noticeBackTimer->stop();
+	this->noticeBackTimer->start();
 }
 
 void AddFriend::paintEvent(QPaintEvent*)
@@ -97,9 +112,6 @@ void AddFriend::paintEvent(QPaintEvent*)
 void AddFriend::showEvent(QShowEvent*)
 {
 	this->setFixedSize(400, 60);
-	//this->notification->setGeometry(QRect(QPoint(this->rect().center().x() - (this->notification->width() / 2), this->rect().top() + 20), QSize(this->notification->size())));
-	this->noticeAnimation->setStartValue(QRect(QPoint(this->rect().center().x() - (this->notification->width() / 2), this->rect().top() - (this->notification->height())), QSize(this->notification->size())));
-	this->noticeAnimation->setEndValue(QRect(QPoint(this->rect().center().x() - (this->notification->width() / 2), this->rect().top() + 40), QSize(this->notification->size())));
 }
 
 void AddFriend::searchFriend(const QString& userAccount)
@@ -109,6 +121,18 @@ void AddFriend::searchFriend(const QString& userAccount)
 	this->windowSizeAnimation->start();
 
 	emit this->searchFriendSignal(userAccount);
+}
+
+void AddFriend::SizeAnimationFrameChanged(int frame)
+{
+	this->setFixedSize(this->width(), frame);
+}
+
+void AddFriend::noticeAnimationTimerOut()
+{
+	this->noticeAnimation->setDirection(QPropertyAnimation::Backward);
+	this->noticeAnimation->stop();
+	this->noticeAnimation->start();
 }
 
 void AddFriend::mousePressEvent(QMouseEvent* event)
@@ -135,4 +159,26 @@ void AddFriend::mouseMoveEvent(QMouseEvent* event)
 	}
 
 	QWidget::mouseMoveEvent(event);
+}
+
+void AddFriend::SearchBarTextEmpty()
+{
+	if (this->height() <= 60)
+		return;
+	this->windowSizeAnimation->setDirection(QTimeLine::Backward);
+	this->windowSizeAnimation->stop();
+	this->windowSizeAnimation->start();
+
+	if (this->listWidget->count() != 0) {
+		for (int i = 0; i < this->listWidget->count(); i++) {
+			QListWidgetItem* item = this->listWidget->item(i);
+			if (item) {
+				SearchFriendItemWidget* itemWidget = qobject_cast<SearchFriendItemWidget*>(this->listWidget->itemWidget(item));
+				itemWidget->deleteLater();
+				itemWidget = Q_NULLPTR;
+			}
+			delete item;
+			item = Q_NULLPTR;
+		}
+	}
 }

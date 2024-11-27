@@ -14,6 +14,7 @@ class SearchFriendItemWidget : public QWidget
 public:
 	SearchFriendItemWidget(const SearchFriendData& friend_data, QWidget* parent);
 	~SearchFriendItemWidget();
+	void ExistTheUser();
 protected:
 	bool eventFilter(QObject* target, QEvent* event) Q_DECL_OVERRIDE;
 private:
