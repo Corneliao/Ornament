@@ -1,15 +1,16 @@
-#pragma once
+﻿#pragma once
 
 #include <QStyledItemDelegate>
 #include <QPainter>
 #include "../../global.h"
 #include <QLabel>
+#include <QFontMetrics>
 class FriendChatDelegate : public QStyledItemDelegate
 {
 	Q_OBJECT
 
 public:
-	FriendChatDelegate(QObject *parent);
+	FriendChatDelegate(QObject* parent);
 	~FriendChatDelegate();
 protected:
 	void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;

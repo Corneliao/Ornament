@@ -86,6 +86,8 @@ void AddFriendButton::paintEvent(QPaintEvent*)
 FeatureButton::FeatureButton(const QString& normaIco, const QString& selectedIco, const QString& buttonText, const int index, QWidget* parent) :QWidget(parent)
 {
 	this->currentIndex = index;
+	if (this->currentIndex == 0)
+		this->isPressed = true;
 	this->ico_text = buttonText;
 	this->setFixedSize(parent->width() - 20, 40);
 	this->setCursor(Qt::PointingHandCursor);

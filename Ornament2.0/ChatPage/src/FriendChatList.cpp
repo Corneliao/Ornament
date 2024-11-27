@@ -6,7 +6,6 @@ FriendChatList::FriendChatList(QWidget* parent)
 	this->setFixedWidth(200);
 
 	QVBoxLayout* main_vbox = new QVBoxLayout(this);
-	//main_vbox->setContentsMargins(0, 0, 0, 0);
 	this->setLayout(main_vbox);
 
 	QPalette pale;
@@ -41,6 +40,8 @@ void FriendChatList::increaseFriendItem(const QString& userHead, const QString& 
 	item->setData(Qt::UserRole, QVariant::fromValue(chat_data));
 	this->chat_listWidget->addItem(item);
 }
+
+
 
 void FriendChatList::paintEvent(QPaintEvent*)
 {

@@ -69,6 +69,7 @@ Login::Login(QWidget* parent)
 	this->userDatabase->moveToThread(this->sql_thread);
 	this->sql_thread->start();
 
+
 	connect(this->sql_thread, &QThread::started, this->userDatabase, &UserDatabaseManager::iniSql, Qt::DirectConnection);
 	//	connect(this->login_title_Bar, &NormalTitleBar::closeWindowSignal, this->userDatabase, &UserDatabaseManager::closeDatabase, Qt::QueuedConnection);
 	connect(this->login_title_Bar, &NormalTitleBar::closeWindowSignal, this, &Login::close, Qt::QueuedConnection);

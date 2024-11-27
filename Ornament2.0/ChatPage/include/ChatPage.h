@@ -9,10 +9,10 @@
 class ChatPage : public QWidget
 {
 	Q_OBJECT
-
 public:
 	ChatPage(QWidget* parent);
 	~ChatPage();
+
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 private:

@@ -3,13 +3,12 @@
 Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes, const QString& userName, const  int& userAccount, QWidget* parent)
 	: FramelessWindow(parent)
 {
+	qRegisterMetaType<QList<FriendListData>>("QList<FriendListData>");
 	GLOB_UserAccount = userAccount;
 	GLOB_UserName = userName;
-	//GLOB_UserHead = userhead_pixmap;
 
 	this->setMinimumSize(1050, 750);
 	QVBoxLayout* main_vbox = new QVBoxLayout(this);
-	main_vbox->setContentsMargins(0, 0, 0, 0);
 	this->setLayout(main_vbox);
 	this->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -38,9 +37,6 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	this->tool->setGeometry(QRect(QPoint(this->rect().right() - (this->tool->width() + 20), this->rect().top() + 70), QSize(this->tool->size())));
 	this->tool->hide();
 
-	//this->addFriend = new AddFriend();
-	//this->addFriend->setGeometry(QRect(this->rect().center().x() - (this->addFriend->width() / 2), this->rect().top() + 80, this->addFriend->width(), this->addFriend->height()));
-
 	connect(this->application_title_Bar, &ApplicationTitleBar::showToolSignal, this, &Ornament::showTool, Qt::DirectConnection);
 	connect(this, &Ornament::ToolStateSignal, this->application_title_Bar, &ApplicationTitleBar::setUnfoldIcon, Qt::DirectConnection);
 	connect(this->tool, &TitleTool::minWindowSignal, this, &Ornament::showMinimized, Qt::DirectConnection);
@@ -53,11 +49,12 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	//连接服务器
 	this->chat_thread = new  QThread;
 	this->chat_network_manager = new ChatNetworkManager;
-	chat_network_manager->moveToThread(this->sql_thread);
+	this->chat_network_manager->moveToThread(this->chat_thread);
 	connect(this->chat_thread, &QThread::started, this->chat_network_manager, &ChatNetworkManager::initializeSocket, Qt::DirectConnection);
 	this->chat_thread->start();
 	connect(this->chat_network_manager, &ChatNetworkManager::connectedSignal, this, &Ornament::startSqlThread, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::connecterrorSignal, this, &Ornament::deleteChatThread, Qt::QueuedConnection);
+	connect(this->chat_network_manager, &ChatNetworkManager::UserLogined, this->friend_page, &FriendPage::updateFriendCurrentStatus,Qt::QueuedConnection);
 }
 
 Ornament::~Ornament()
@@ -80,6 +77,7 @@ void Ornament::startSqlThread()
 	connect(this->userDataBase, &UserDatabaseManager::SendApplicationToServer, this->chat_network_manager, &ChatNetworkManager::sendApplication, Qt::DirectConnection);
 	connect(this->userDataBase, &UserDatabaseManager::isSendApplication, this, &Ornament::isSendApplication, Qt::QueuedConnection);
 	connect(this->userDataBase, &UserDatabaseManager::existTheUserSignal, this, &Ornament::existTheUserSignal, Qt::QueuedConnection);
+	connect(this->userDataBase, &UserDatabaseManager::userFriends, this->friend_page, &FriendPage::userFriendList, Qt::QueuedConnection);
 }
 
 void Ornament::deleteChatThread()
@@ -142,7 +140,7 @@ void Ornament::showTool()
 void Ornament::showAddFriend()
 {
 	this->addFriend = new AddFriend();
-	this->addFriend->move(600, (screenSize.height() - this->addFriend->height()) / 2);
+	this->addFriend->move(700, (screenSize.height() - this->addFriend->height()) / 2);
 	connect(this->addFriend, &AddFriend::searchFriendSignal, this, &Ornament::searchFriendSignal, Qt::DirectConnection);
 	connect(this, &Ornament::SearchFriendDataSignal, this->addFriend, &AddFriend::increaseSearchMember, Qt::DirectConnection);
 	connect(this->addFriend, &AddFriend::sendFriendApplication, this, &Ornament::SendFriendApplication, Qt::DirectConnection);

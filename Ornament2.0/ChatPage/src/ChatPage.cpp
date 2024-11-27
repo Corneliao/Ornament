@@ -18,6 +18,8 @@ ChatPage::~ChatPage()
 {
 }
 
+
+
 void ChatPage::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);

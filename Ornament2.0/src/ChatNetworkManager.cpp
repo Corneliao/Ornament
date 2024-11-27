@@ -13,7 +13,6 @@ ChatNetworkManager::~ChatNetworkManager()
 void ChatNetworkManager::initializeSocket()
 {
 	qDebug() << "消息线程" << QThread::currentThreadId();
-
 	this->socket = new QTcpSocket(this);
 	//this->socket->connectToHost(QHostAddress("120.46.157.203"), quint16(7502));
 	this->socket->connectToHost(QHostAddress("127.0.0.1"), quint16(7502));
@@ -22,11 +21,14 @@ void ChatNetworkManager::initializeSocket()
 		qDebug() << this->socket->errorString();
 		return;
 	}
-	qDebug() << "连接成功";
-	GLOB_IsConnectedServer = true;
-	emit this->connectedSignal();
+	else {
+		GLOB_IsConnectedServer = true;
+		connect(this->socket, &QTcpSocket::readyRead, this, &ChatNetworkManager::ReadData, Qt::DirectConnection);
+		emit this->connectedSignal();
+		this->sendLoginInfo();
+	}
 
-	this->sendLoginInfo();
+
 }
 
 void ChatNetworkManager::sendApplication(const QString& receiver)
@@ -49,4 +51,17 @@ void ChatNetworkManager::sendLoginInfo()
 	this->socket->write(out);;
 	if (!this->socket->waitForBytesWritten())
 		qDebug() << this->socket->errorString();
+}
+
+void ChatNetworkManager::ReadData()
+{
+	QDataStream stream(this->socket);
+	int type;
+	stream >> type;
+	qDebug() << type;
+	if (type == MSGTYPE::NoticeNewLogin) {
+		QString account;
+		stream >> account;
+		emit this->UserLogined(account);
+	}
 }

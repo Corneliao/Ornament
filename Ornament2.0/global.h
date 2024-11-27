@@ -20,7 +20,7 @@ struct FeatureBarData {
 struct UserData {
 	QPixmap userHead;
 	QString userName;
-	int userAccount;
+	int userAccount = 0;
 	bool status = false;
 };
 
@@ -34,4 +34,12 @@ struct SearchFriendData {
 	QString userName;
 	bool status;
 	QString userAccount;
+};
+struct FriendListData {
+	QPixmap userHead;
+	QString userName;
+	bool status = false;
+	QString userAccount;
+	QPixmap status_ico;
+	QString status_text;
 };

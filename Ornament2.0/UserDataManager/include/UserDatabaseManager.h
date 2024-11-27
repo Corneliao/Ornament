@@ -27,9 +27,9 @@ public:
 	bool isExistTheSameUserApplication(const QString& receiver);
 	void increaseUserApplicationTemp(const QString& receiver);
 	bool isExistTheUser(const QString& userAccount);
-protected:
-private:
-	QString connectName = "connected_forlogin";
+	FriendListData GetUserFriendData(const QString& cronyAccount); //
+	void selectCurrentUserFriends();
+
 signals:
 	void closedDatabaseSignal();
 	void userHeadByteArray(const QPixmap& userhead);
@@ -42,6 +42,8 @@ signals:
 	void SendApplicationToServer(const QString& receiver);
 	void isSendApplication(bool isSucceed);
 	void existTheUserSignal();
+	void userFriends(QList<FriendListData> datas);
 private:
 	QPixmap pixmap_temp;
+	QString connectName = "connected_forlogin";
 };

@@ -16,6 +16,7 @@ public:
 	~FriendChatList();
 public:
 	void  increaseFriendItem(const QString& userHead, const QString& username);
+
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 private:

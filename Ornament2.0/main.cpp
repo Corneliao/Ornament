@@ -14,7 +14,6 @@ int main(int argc, char* argv[])
 	a.setFont(font);
 	QScreen* primaryScreen = a.primaryScreen();
 	screenSize = primaryScreen->size();
-	qDebug() << primaryScreen->size();
 	Login login;
 	QPoint center = QPoint((primaryScreen->size().width() - login.width()) / 2, (primaryScreen->size().height() - login.height()) / 2);
 	login.move(center);

@@ -3,6 +3,7 @@
 UserDatabaseManager::UserDatabaseManager(const QString& connect_name)
 {
 	this->connectName = connect_name;
+	qRegisterMetaType<QList<FriendListData>>("QList<FriendListData>");
 }
 
 UserDatabaseManager::~UserDatabaseManager()
@@ -185,6 +186,60 @@ bool UserDatabaseManager::isExistTheUser(const QString& userAccount)
 	return false;
 }
 
+FriendListData UserDatabaseManager::GetUserFriendData(const QString& cronyAccount)
+{
+	FriendListData data;
+	QSqlDatabase db = QSqlDatabase::database(this->connectName);
+	QSqlQuery query(db);
+	query.prepare("SELECT userName,userHeadByte,onlineStatus FROM UserInfo WHERE userAccount = " + cronyAccount);
+	if (query.exec()) {
+		while (query.next()) {
+			QString username = query.value(0).toString();
+			QByteArray imagebytes = query.value(1).toByteArray();
+			bool status = query.value(2).toBool();
+			data.status = status;
+			data.userName = username;
+			data.userAccount = cronyAccount;
+			QPixmap pixmap = RoundImage::RoundImageFromByteArray(imagebytes);
+			data.userHead = pixmap;
+			if (status) {
+				pixmap.load(":/Resource/ico/TwemojiGreenCircle.png");
+				data.status_text = "在线";
+			}
+
+			else {
+				data.status_text = "离线";
+				pixmap.load(":/Resource/ico/TwemojiRedCircle.png");
+			}
+			data.status_ico = pixmap;
+			return data;
+		}
+	}
+	else {
+		qDebug() << query.lastError();
+	}
+	return FriendListData();
+}
+
+void UserDatabaseManager::selectCurrentUserFriends()
+{
+	if (this->connectName != tr("connect_main"))
+		return;
+	QList<FriendListData> datas;
+	QSqlDatabase db = QSqlDatabase::database(this->connectName);
+	QSqlQuery query(db);
+	FriendListData data;
+	query.prepare("SELECT cronyAccount FROM UserCrony WHERE userAccount = " + QString::number(GLOB_UserAccount));
+	if (query.exec()) {
+		while (query.next()) {
+			QString account = query.value(0).toString();
+			data = this->GetUserFriendData(account);
+			datas.append(data);
+		}
+	}
+	emit this->userFriends(datas);
+}
+
 void UserDatabaseManager::iniSql()
 {
 	qDebug() << "数据库子线程" << QThread::currentThreadId();
@@ -203,6 +258,8 @@ void UserDatabaseManager::iniSql()
 		qDebug() << __FUNCTION__ << __TIME__ << db.lastError();
 		return;
 	}
+
+	this->selectCurrentUserFriends();
 }
 
 void UserDatabaseManager::selectUserHeadData(const QString& userAccount)

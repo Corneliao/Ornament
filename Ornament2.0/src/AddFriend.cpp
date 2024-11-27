@@ -120,7 +120,8 @@ void AddFriend::searchFriend(const QString& userAccount)
 	this->windowSizeAnimation->stop();
 	this->windowSizeAnimation->start();
 
-	emit this->searchFriendSignal(userAccount);
+	if (GLOB_IsConnectedServer)
+		emit this->searchFriendSignal(userAccount);
 }
 
 void AddFriend::SizeAnimationFrameChanged(int frame)
