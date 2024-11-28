@@ -3,6 +3,8 @@
 Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes, const QString& userName, const  int& userAccount, QWidget* parent)
 	: FramelessWindow(parent)
 {
+	this->setWindowIcon(QIcon(":/Resource/ico/TablerBrandUnity.png"));
+
 	qRegisterMetaType<QList<FriendListData>>("QList<FriendListData>");
 	GLOB_UserAccount = userAccount;
 	GLOB_UserName = userName;
@@ -54,7 +56,7 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	this->chat_thread->start();
 	connect(this->chat_network_manager, &ChatNetworkManager::connectedSignal, this, &Ornament::startSqlThread, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::connecterrorSignal, this, &Ornament::deleteChatThread, Qt::QueuedConnection);
-	connect(this->chat_network_manager, &ChatNetworkManager::UserLogined, this->friend_page, &FriendPage::updateFriendCurrentStatus,Qt::QueuedConnection);
+	connect(this->chat_network_manager, &ChatNetworkManager::UserLogined, this->friend_page, &FriendPage::updateFriendCurrentStatus, Qt::QueuedConnection);
 }
 
 Ornament::~Ornament()
@@ -140,7 +142,7 @@ void Ornament::showTool()
 void Ornament::showAddFriend()
 {
 	this->addFriend = new AddFriend();
-	this->addFriend->move(700, (screenSize.height() - this->addFriend->height()) / 2);
+
 	connect(this->addFriend, &AddFriend::searchFriendSignal, this, &Ornament::searchFriendSignal, Qt::DirectConnection);
 	connect(this, &Ornament::SearchFriendDataSignal, this->addFriend, &AddFriend::increaseSearchMember, Qt::DirectConnection);
 	connect(this->addFriend, &AddFriend::sendFriendApplication, this, &Ornament::SendFriendApplication, Qt::DirectConnection);

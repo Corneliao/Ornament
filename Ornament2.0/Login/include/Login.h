@@ -15,6 +15,7 @@
 #include "../../Component/include/RoundImage.h"
 #include "../Component/include/ButtonComponent.h"
 #include "../Register/include/RegisterUserAccount.h"
+#include "../../Component/include/SystemNotification.h"
 
 class Login : public FramelessWindow
 {
@@ -31,6 +32,7 @@ protected:
 	void deleteRegisterWindow();
 	void closeEvent(QCloseEvent*)Q_DECL_OVERRIDE;
 	void deleteSqlThread();
+	void VerifyFailed();
 private:
 	NormalTitleBar* login_title_Bar = Q_NULLPTR;
 	QLabel* userHead = Q_NULLPTR;
@@ -44,6 +46,8 @@ private:
 	RegisterUserAccount* registerUserAccount = Q_NULLPTR;
 	QPropertyAnimation* login_button_animation = Q_NULLPTR;
 	bool isLogining = false;
+	SystemNotification* login_notification = Q_NULLPTR;
+	QPropertyAnimation* login_notification_animation = Q_NULLPTR;
 signals:
 	void startloginAccountSignal(const QString& userAccount, const QString& password);
 	//	void VerifySucceed(const QByteArray& imagebytes, const QString& userName, const  int& userAccount);

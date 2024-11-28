@@ -57,6 +57,13 @@ Login::Login(QWidget* parent)
 	this->login_button_animation->setDuration(200);
 	this->login_button_animation->setEasingCurve(QEasingCurve::InOutQuad);
 
+	this->login_notification = new SystemNotification(this);
+	this->login_notification->setGeometry(QRect(QPoint(this->rect().center().x() - (this->login_notification->width() / 2), this->rect().top() - (this->login_notification->height())), QSize(this->login_notification->size())));
+
+	this->login_notification_animation = new QPropertyAnimation(this->login_notification, "geometry", this);
+	this->login_notification_animation->setDuration(500);
+	this->login_notification_animation->setEasingCurve(QEasingCurve::InOutSine);
+
 	connect(this->loginButton, &ButtonComponent::showed, this, [=]() {
 		this->login_button_animation->setStartValue(this->loginButton->geometry());
 		this->login_button_animation->setEndValue(QRect(QPoint(this->loginButton->pos().x() + ((this->loginButton->width() - 200) / 2), this->loginButton->pos().y() + ((this->loginButton->height() - 20) / 2)), QSize(200, 20)));
@@ -68,24 +75,13 @@ Login::Login(QWidget* parent)
 	this->userDatabase = new UserDatabaseManager("connec_login");
 	this->userDatabase->moveToThread(this->sql_thread);
 	this->sql_thread->start();
-
-
 	connect(this->sql_thread, &QThread::started, this->userDatabase, &UserDatabaseManager::iniSql, Qt::DirectConnection);
-	//	connect(this->login_title_Bar, &NormalTitleBar::closeWindowSignal, this->userDatabase, &UserDatabaseManager::closeDatabase, Qt::QueuedConnection);
 	connect(this->login_title_Bar, &NormalTitleBar::closeWindowSignal, this, &Login::close, Qt::QueuedConnection);
-	//connect(this->userDatabase, &UserDatabaseManager::closedDatabaseSignal, this, &Login::close, Qt::QueuedConnection);
 	connect(this->userAccountEdit, &LineEditComponent::userAccountChanged, this->userDatabase, &UserDatabaseManager::selectUserHeadData, Qt::QueuedConnection);
 	connect(this->userDatabase, &UserDatabaseManager::userHeadByteArray, this, &Login::getUserHeadBytes, Qt::QueuedConnection);
 	connect(this, &Login::startloginAccountSignal, this->userDatabase, &UserDatabaseManager::VerifyUserAcocunt, Qt::QueuedConnection);
 	connect(this->userDatabase, &UserDatabaseManager::VerifySucceed, this, &Login::VerifySucceed, Qt::QueuedConnection);
-	connect(this->userDatabase, &UserDatabaseManager::VerifyFailed, this, [=]() {
-		this->isLogining = false;
-		qDebug() << "账号或密码错误";
-		}, Qt::QueuedConnection); ;
-	connect(this->userDatabase, &UserDatabaseManager::UnValidUserAccount, this, [=](bool enable) {
-		this->isLogining = false;
-		qDebug() << "账号不存在";
-		});
+	connect(this->userDatabase, &UserDatabaseManager::VerifyFailed, this, &Login::VerifyFailed, Qt::QueuedConnection); ;
 }
 Login::~Login()
 {
@@ -173,4 +169,21 @@ void Login::deleteSqlThread()
 		this->sql_thread->wait();
 		this->sql_thread = Q_NULLPTR;
 	}
+}
+
+void Login::VerifyFailed()
+{
+	this->isLogining = false;
+	this->login_notification->setText("账号不存在或密码错误");
+	//this->login_notification->setGeometry(QRect(QPoint(this->rect().center().x() - (this->login_notification->width() / 2), this->rect().top() - (this->login_notification->height())), QSize(this->login_notification->size())));
+	this->login_notification_animation->setDirection(QPropertyAnimation::Forward);
+	this->login_notification_animation->setStartValue(QRect(QPoint(this->rect().center().x() - (this->login_notification->width() / 2), this->rect().top() - (this->login_notification->height())), QSize(this->login_notification->size())));
+	this->login_notification_animation->setEndValue(QRect(QPoint(this->rect().center().x() - (this->login_notification->width() / 2), this->rect().top() + 20), QSize(this->login_notification->size())));
+	this->login_notification_animation->stop();
+	this->login_notification_animation->start();
+	QTimer::singleShot(1000, this, [=]() {
+		this->login_notification_animation->setDirection(QPropertyAnimation::Backward);
+		this->login_notification_animation->stop();
+		this->login_notification_animation->start();
+		});
 }

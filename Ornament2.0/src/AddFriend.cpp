@@ -112,6 +112,7 @@ void AddFriend::paintEvent(QPaintEvent*)
 void AddFriend::showEvent(QShowEvent*)
 {
 	this->setFixedSize(400, 60);
+	this->move((screenSize.width()-this->width())/2, (screenSize.height() - this->height()) / 2);
 }
 
 void AddFriend::searchFriend(const QString& userAccount)

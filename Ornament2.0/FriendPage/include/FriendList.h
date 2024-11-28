@@ -6,9 +6,11 @@
 #include <QPainter>
 #include <QListWidget>
 #include <QStandardItemModel>
+#include <qsystemtrayicon.h>
 #include "../../Component/include/RoundImage.h"
 #include "../../StyledItemDelegate/include/FriendListDelegate.h"
 #include "../../global.h"
+#include "../../include/SystemTrayIconNotification.h"
 class FriendList : public QWidget
 {
 	Q_OBJECT
@@ -25,4 +27,5 @@ protected:
 private:
 	QListView* friend_listView = Q_NULLPTR;
 	QStandardItemModel* model = Q_NULLPTR;
+	QSystemTrayIcon* trayIcon = Q_NULLPTR;
 };

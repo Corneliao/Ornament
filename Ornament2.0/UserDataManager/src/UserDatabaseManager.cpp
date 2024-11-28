@@ -41,16 +41,17 @@ void UserDatabaseManager::VerifyUserAcocunt(const QString& userAccount, const QS
 							if (password == userPassword)
 								emit this->VerifySucceed(this->pixmap_temp, imagebytes, userName, userAccount.toInt());
 							else
-								emit this->VerifyFailed(true);
+								emit this->VerifyFailed();
 							return;
 						}
 					}
 				}
 			}
-			emit this->UnValidUserAccount(true);
+			emit this->VerifyFailed();
+
 		}
 		else {
-			emit this->UnValidUserAccount(true);
+			emit this->VerifyFailed();
 		}
 	}
 }

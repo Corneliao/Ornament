@@ -35,7 +35,7 @@ signals:
 	void userHeadByteArray(const QPixmap& userhead);
 	//void VerifySucceed(const QByteArray& imagebytes, const QString& userName, const  int& userAccount);
 	void VerifySucceed(const QPixmap& userhead_pixmap, const QByteArray& imagebytes, const QString& userName, const  int& userAccount);
-	void VerifyFailed(bool flag);
+	void VerifyFailed();
 	void UnValidUserAccount(bool enable);
 	void RegisterSucceedSignal(const int& account);
 	void SearchFriendDataSignal(const SearchFriendData& data);

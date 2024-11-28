@@ -41,8 +41,6 @@ void FriendChatList::increaseFriendItem(const QString& userHead, const QString& 
 	this->chat_listWidget->addItem(item);
 }
 
-
-
 void FriendChatList::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);

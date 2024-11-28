@@ -58,7 +58,6 @@ void ChatNetworkManager::ReadData()
 	QDataStream stream(this->socket);
 	int type;
 	stream >> type;
-	qDebug() << type;
 	if (type == MSGTYPE::NoticeNewLogin) {
 		QString account;
 		stream >> account;

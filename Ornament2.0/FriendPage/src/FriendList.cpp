@@ -1,9 +1,11 @@
 ﻿#include "../include/FriendList.h"
-
+#include <QSystemTrayIcon>
 FriendList::FriendList(QWidget* parent)
 	: QWidget(parent)
 {
 	this->setFixedWidth(200);
+
+	this->setWindowIcon(QIcon(":/Resource/ico/TablerBrandUnity.png"));
 
 	QVBoxLayout* main_vbox = new QVBoxLayout(this);
 	this->setLayout(main_vbox);
@@ -18,6 +20,11 @@ FriendList::FriendList(QWidget* parent)
 	this->model = new QStandardItemModel(this);
 	this->friend_listView->setModel(this->model);
 	main_vbox->addWidget(friend_listView);
+
+	//this->trayIcon = new QSystemTrayIcon(this);
+	//this->trayIcon->setIcon(QIcon(":/Resource/ico/TablerBrandUnity.png"));
+	//this->trayIcon->setToolTip("Ornament");
+	//this->trayIcon->show();
 }
 
 FriendList::~FriendList()
@@ -50,7 +57,8 @@ void FriendList::updateFriendCurrentStatus(const QString& cronyAccount)
 			data.status_ico = pixmap;
 			data.status_text = "在线";
 			item->setData(QVariant::fromValue(data), Qt::UserRole);
-			qDebug() << "更新好友登录状态";
+			//this->trayIcon->showMessage(data.userName, "你的好友已上线", data.userHead.scaled(QSize(100 * GLOB_ScaleDpi, 100 * GLOB_ScaleDpi), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+			SystemTrayIconNotification::getInstence()->showMessage(data.userName, "你的好友已上线", data.userHead.scaled(QSize(100 * GLOB_ScaleDpi, 100 * GLOB_ScaleDpi), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 			return;
 		}
 	}

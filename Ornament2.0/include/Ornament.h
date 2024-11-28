@@ -17,6 +17,7 @@
 #include "ChatNetworkManager.h"
 #include "../FriendPage/include/FriendPage.h"
 #include "AddFriend.h"
+#include "SystemTrayIconNotification.h"
 class Ornament : public FramelessWindow
 {
 	Q_OBJECT
