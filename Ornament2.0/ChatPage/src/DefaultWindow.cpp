@@ -1,11 +1,11 @@
-#include "../include/DefaultWindow.h"
+﻿#include "../include/DefaultWindow.h"
 
-DefaultWindow::DefaultWindow(QWidget *parent)
+DefaultWindow::DefaultWindow(QWidget* parent)
 	: QWidget(parent)
 {
 	QHBoxLayout* main_lay = new QHBoxLayout(this);
 	this->setLayout(main_lay);
-	
+
 	this->NoChatWindowIco = new QLabel(this);
 	this->NoChatWindowIco->setFixedSize(80, 80);
 	this->NoChatWindowIco->setScaledContents(true);

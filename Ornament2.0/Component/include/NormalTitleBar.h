@@ -13,6 +13,7 @@ class NormalTitleBar : public QWidget
 public:
 	NormalTitleBar(const QString& text = "", QWidget* parent = Q_NULLPTR);
 	~NormalTitleBar();
+	void setCloseVisible(bool visible);
 protected:
 	bool eventFilter(QObject* target, QEvent* event)Q_DECL_OVERRIDE;
 private:

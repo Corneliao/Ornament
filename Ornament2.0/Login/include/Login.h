@@ -15,7 +15,7 @@
 #include "../../Component/include/RoundImage.h"
 #include "../Component/include/ButtonComponent.h"
 #include "../Register/include/RegisterUserAccount.h"
-#include "../../Component/include/SystemNotification.h"
+#include "../../Component/include/Notification.h"
 
 class Login : public FramelessWindow
 {
@@ -46,7 +46,7 @@ private:
 	RegisterUserAccount* registerUserAccount = Q_NULLPTR;
 	QPropertyAnimation* login_button_animation = Q_NULLPTR;
 	bool isLogining = false;
-	SystemNotification* login_notification = Q_NULLPTR;
+	Notification* login_notification = Q_NULLPTR;
 	QPropertyAnimation* login_notification_animation = Q_NULLPTR;
 signals:
 	void startloginAccountSignal(const QString& userAccount, const QString& password);

@@ -27,8 +27,6 @@ void ChatNetworkManager::initializeSocket()
 		emit this->connectedSignal();
 		this->sendLoginInfo();
 	}
-
-
 }
 
 void ChatNetworkManager::sendApplication(const QString& receiver)
@@ -62,5 +60,15 @@ void ChatNetworkManager::ReadData()
 		QString account;
 		stream >> account;
 		emit this->UserLogined(account);
+	}
+	else if (type == MSGTYPE::CronyApplication) {
+		QString sender;
+		stream >> sender;
+		emit this->acceptUserApplication(sender);
+	}
+	else if (type == MSGTYPE::updateCronyList) {
+		QString senderAccount;
+		stream >> senderAccount;
+		emit this->updateUserFriendList(senderAccount);
 	}
 }

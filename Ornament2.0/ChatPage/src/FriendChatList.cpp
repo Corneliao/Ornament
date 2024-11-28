@@ -19,26 +19,46 @@ FriendChatList::FriendChatList(QWidget* parent)
 
 	main_vbox->addWidget(this->chat_listWidget);
 
-	this->increaseFriendItem(R"("D:\Doga\WallPaper\b_7ee3bc45e31b578427bd985ae04f0ab9.png")", GLOB_UserName);
-	this->increaseFriendItem(R"("D:\Doga\WallPaper\b_7ee3bc45e31b578427bd985ae04f0ab9.png")", GLOB_UserName);
-	this->increaseFriendItem(R"("D:\Doga\WallPaper\b_7ee3bc45e31b578427bd985ae04f0ab9.png")", GLOB_UserName);
-	this->increaseFriendItem(R"("D:\Doga\WallPaper\b_7ee3bc45e31b578427bd985ae04f0ab9.png")", GLOB_UserName);
+	connect(this->chat_listWidget, &QListWidget::itemChanged, this, &FriendChatList::FriendChatItemChanged, Qt::DirectConnection);
 }
 
 FriendChatList::~FriendChatList()
 {
 }
 
-void FriendChatList::increaseFriendItem(const QString& userHead, const QString& username)
+void FriendChatList::increaseFriendItem(UserData& user_data)
 {
-	QPixmap userHeadPixmap = RoundImage::RoundImageFromStringPath("D:/Doga/WallPaper/b_7ee3bc45e31b578427bd985ae04f0ab9.png");
-	FriendChatData chat_data;
-	chat_data.userHead = userHeadPixmap;
-	chat_data.userMessage = "这是一条消息";
-	chat_data.userName = username;
+	user_data.userMessage = "...";
+	user_data.index = this->chat_listWidget->count() + 1;
 	QListWidgetItem* item = new  QListWidgetItem(this->chat_listWidget);
-	item->setData(Qt::UserRole, QVariant::fromValue(chat_data));
+	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
 	this->chat_listWidget->addItem(item);
+	item->setSelected(true);
+}
+
+bool FriendChatList::isExistFriendChatItem(const QString& account)
+{
+	for (int i = 0; i < this->chat_listWidget->count(); i++) {
+		QListWidgetItem* item = this->chat_listWidget->item(i);
+		UserData user_data = item->data(Qt::UserRole).value<UserData>();
+		if (user_data.userAccount == account) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void FriendChatList::setItemSelected(const QString& account)
+{
+	for (int i = 0; i < this->chat_listWidget->count(); i++) {
+		QListWidgetItem* item = this->chat_listWidget->item(i);
+		UserData user_data = item->data(Qt::UserRole).value<UserData>();
+		if (user_data.userAccount == account) {
+			item->setSelected(true);
+			return;
+		}
+	}
+	;
 }
 
 void FriendChatList::paintEvent(QPaintEvent*)

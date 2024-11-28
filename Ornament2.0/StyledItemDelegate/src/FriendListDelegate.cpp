@@ -17,7 +17,8 @@ void FriendListDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 	QStyleOptionViewItem viewoption(option);
 	initStyleOption(&viewoption, index);
 
-	FriendListData friend_data = index.data(Qt::UserRole).value<FriendListData>();
+	UserData user_data = index.data(Qt::UserRole).value<UserData>();
+	//FriendListData friend_data = index.data(Qt::UserRole).value<FriendListData>();
 	QRect item_rect = option.rect;
 	item_rect.adjust(2, 2, -2, -2);
 
@@ -43,10 +44,10 @@ void FriendListDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 	painter->save();
 	painter->setPen(Qt::NoPen);
 	painter->setBrush(Qt::NoBrush);
-	painter->drawPixmap(userheadRect, friend_data.userHead.scaled(QSize(userheadRect.size() * GLOB_ScaleDpi), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+	painter->drawPixmap(userheadRect, user_data.userHead.scaled(QSize(userheadRect.size() * GLOB_ScaleDpi), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 	painter->restore();
 
-	QLabel temp(friend_data.userName);
+	QLabel temp(user_data.userName);
 	temp.adjustSize();
 
 	//昵称
@@ -54,10 +55,10 @@ void FriendListDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 	painter->save();
 	painter->setPen(Qt::black);
 	painter->setBrush(Qt::NoBrush);
-	painter->drawText(userNameRect, Qt::AlignCenter, friend_data.userName);
+	painter->drawText(userNameRect, Qt::AlignCenter, user_data.userName);
 	painter->restore();
 
-	temp.setText(friend_data.status_text);
+	temp.setText(user_data.status_text);
 	temp.adjustSize();
 
 	QRect status_text_rect(item_rect.right() - (temp.width() + 10), item_rect.center().y() - (temp.height() / 2), temp.width(), temp.height());
@@ -67,14 +68,13 @@ void FriendListDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 	painter->save();
 	painter->setPen(Qt::NoPen);
 	painter->setBrush(Qt::NoBrush);
-	painter->drawPixmap(status_ico_rect, friend_data.status_ico.scaled(QSize(status_ico_rect.size() * GLOB_ScaleDpi), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+	painter->drawPixmap(status_ico_rect, user_data.status_ico.scaled(QSize(status_ico_rect.size() * GLOB_ScaleDpi), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 	painter->restore();
-
 
 	painter->save();
 	painter->setPen(Qt::black);
 	painter->setBrush(Qt::NoBrush);
-	painter->drawText(status_text_rect, Qt::AlignCenter, friend_data.status_text);
+	painter->drawText(status_text_rect, Qt::AlignCenter, user_data.status_text);
 	painter->restore();
 }
 

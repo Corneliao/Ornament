@@ -3,7 +3,7 @@
 FriendPage::FriendPage(QWidget* parent)
 	: QWidget(parent)
 {
-	qRegisterMetaType<QList<FriendListData>>("QList<FriendListData>");
+	qRegisterMetaType<QList<UserData>>("QList<UserData>");
 	QHBoxLayout* main_lay = new QHBoxLayout(this);
 	this->setLayout(main_lay);
 
@@ -12,6 +12,7 @@ FriendPage::FriendPage(QWidget* parent)
 	main_lay->addStretch();
 
 	connect(this, &FriendPage::userFriendList, this->friend_list, &FriendList::initializeFriends, Qt::DirectConnection);
+	connect(this->friend_list, &FriendList::createChatWindowSignal, this, &FriendPage::createChatWindowSignal, Qt::DirectConnection);
 }
 
 FriendPage::~FriendPage()

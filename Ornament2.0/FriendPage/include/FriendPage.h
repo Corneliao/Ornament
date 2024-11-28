@@ -17,5 +17,6 @@ private:
 	FriendInfo* friend_info = Q_NULLPTR;
 	FriendList* friend_list = Q_NULLPTR;
 signals:
-	void userFriendList(const QList<FriendListData> datas);
+	void userFriendList(const QList<UserData> datas);
+	void createChatWindowSignal(const QListWidgetItem* item);
 };

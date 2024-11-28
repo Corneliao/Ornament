@@ -15,10 +15,14 @@ public:
 	FriendChatList(QWidget* parent);
 	~FriendChatList();
 public:
-	void  increaseFriendItem(const QString& userHead, const QString& username);
+	void  increaseFriendItem(UserData& user_data);
+	bool isExistFriendChatItem(const QString& account);
+	void setItemSelected(const QString& account);
 
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 private:
 	QListWidget* chat_listWidget = Q_NULLPTR;
+signals:
+	void FriendChatItemChanged(const QListWidgetItem* item);
 };

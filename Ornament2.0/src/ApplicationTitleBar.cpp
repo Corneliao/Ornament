@@ -41,10 +41,12 @@ ApplicationTitleBar::ApplicationTitleBar(QWidget* parent)
 	this->search->installEventFilter(this);
 
 	this->notification = new QLabel(this);
+	this->notification->setCursor(Qt::PointingHandCursor);
 	this->notification->setFixedSize(18, 18);
 	this->notification->setScaledContents(true);
 	pixmap.load(":/Resource/ico/RiNotification3Line.png");
 	this->notification->setPixmap(pixmap);
+	this->notification->installEventFilter(this);
 
 	//--------------------
 
@@ -123,6 +125,12 @@ bool ApplicationTitleBar::eventFilter(QObject* target, QEvent* event)
 	if (target == this->search) {
 		if (event->type() == QEvent::MouseButtonPress) {
 			emit this->showAddFriendSignal();
+			return true;
+		}
+	}
+	if (target == this->notification) {
+		if (event->type() == QEvent::MouseButtonPress) {
+			emit this->showSystemNotification();
 			return true;
 		}
 	}

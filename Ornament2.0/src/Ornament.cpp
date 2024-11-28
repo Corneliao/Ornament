@@ -5,12 +5,13 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 {
 	this->setWindowIcon(QIcon(":/Resource/ico/TablerBrandUnity.png"));
 
-	qRegisterMetaType<QList<FriendListData>>("QList<FriendListData>");
+	qRegisterMetaType<QList<UserData>>("QList<UserData>");
 	GLOB_UserAccount = userAccount;
 	GLOB_UserName = userName;
 
 	this->setMinimumSize(1050, 750);
 	QVBoxLayout* main_vbox = new QVBoxLayout(this);
+	main_vbox->setContentsMargins(0, 0, 0, 0);
 	this->setLayout(main_vbox);
 	this->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -39,6 +40,20 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	this->tool->setGeometry(QRect(QPoint(this->rect().right() - (this->tool->width() + 20), this->rect().top() + 70), QSize(this->tool->size())));
 	this->tool->hide();
 
+	this->systemNotification = new SystemNotification(this);
+	this->systemNotification->setGeometry(QRect(QPoint(this->rect().right() + 5, this->rect().top() + 10), QSize(this->systemNotification->size())));
+	this->systemNotification->hide();
+
+	this->systemNotification_Animation = new QTimeLine(700, this);
+	this->systemNotification_Animation->setEasingCurve(QEasingCurve::InOutSine);
+	this->systemNotification_Animation->setUpdateInterval(0);
+	this->systemNotification_Animation->setFrameRange(this->rect().right() + 5, this->rect().right() - (this->systemNotification->width() + 10));
+	connect(this->systemNotification_Animation, &QTimeLine::frameChanged, this, &Ornament::SystemNotificationAnimationFrameChanged, Qt::DirectConnection);
+	connect(this->systemNotification_Animation, &QTimeLine::finished, this, [=]() {
+		if (this->systemNotification_Animation->direction() == QTimeLine::Backward)
+			this->systemNotification->hide();
+		});
+
 	connect(this->application_title_Bar, &ApplicationTitleBar::showToolSignal, this, &Ornament::showTool, Qt::DirectConnection);
 	connect(this, &Ornament::ToolStateSignal, this->application_title_Bar, &ApplicationTitleBar::setUnfoldIcon, Qt::DirectConnection);
 	connect(this->tool, &TitleTool::minWindowSignal, this, &Ornament::showMinimized, Qt::DirectConnection);
@@ -46,6 +61,13 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	connect(this->tool, &TitleTool::closeWindowSignal, this, &Ornament::close, Qt::DirectConnection);
 	connect(this->application_feature_Bar, &ApplicationFeaureBar::indexChanged, this->stack_layout, &QStackedLayout::setCurrentIndex, Qt::DirectConnection);
 	connect(this->application_title_Bar, &ApplicationTitleBar::showAddFriendSignal, this, &Ornament::showAddFriend, Qt::DirectConnection);
+	connect(this->application_title_Bar, &ApplicationTitleBar::showSystemNotification, this, &Ornament::showSystemNotification, Qt::DirectConnection);
+	connect(this->friend_page, &FriendPage::createChatWindowSignal, this->chat_page, &ChatPage::CreateChatWindow, Qt::DirectConnection);
+	connect(this->friend_page, &FriendPage::createChatWindowSignal, this, [=](const QListWidgetItem* item) {
+		Q_UNUSED(item);
+		this->stack_layout->setCurrentIndex(0);
+		this->application_feature_Bar->setCurrentFeatureButton(0);
+		});
 
 	qDebug() << "主线程" << QThread::currentThreadId();
 	//连接服务器
@@ -57,6 +79,7 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	connect(this->chat_network_manager, &ChatNetworkManager::connectedSignal, this, &Ornament::startSqlThread, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::connecterrorSignal, this, &Ornament::deleteChatThread, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::UserLogined, this->friend_page, &FriendPage::updateFriendCurrentStatus, Qt::QueuedConnection);
+	//connect(this->chat_network_manager,&ChatNetworkManager::updateUserFriendList,this->)
 }
 
 Ornament::~Ornament()
@@ -76,10 +99,11 @@ void Ornament::startSqlThread()
 	connect(this->userDataBase, &UserDatabaseManager::SearchFriendDataSignal, this, &Ornament::SearchFriendDataSignal, Qt::QueuedConnection);
 	connect(this, &Ornament::searchFriendSignal, this->userDataBase, &UserDatabaseManager::selectUserDataForSearch, Qt::QueuedConnection);
 	connect(this, &Ornament::SendFriendApplication, this->userDataBase, &UserDatabaseManager::increaseUserApplicationTemp, Qt::QueuedConnection);
-	connect(this->userDataBase, &UserDatabaseManager::SendApplicationToServer, this->chat_network_manager, &ChatNetworkManager::sendApplication, Qt::DirectConnection);
+	connect(this->userDataBase, &UserDatabaseManager::SendApplicationToServer, this->chat_network_manager, &ChatNetworkManager::sendApplication, Qt::QueuedConnection);
 	connect(this->userDataBase, &UserDatabaseManager::isSendApplication, this, &Ornament::isSendApplication, Qt::QueuedConnection);
 	connect(this->userDataBase, &UserDatabaseManager::existTheUserSignal, this, &Ornament::existTheUserSignal, Qt::QueuedConnection);
 	connect(this->userDataBase, &UserDatabaseManager::userFriends, this->friend_page, &FriendPage::userFriendList, Qt::QueuedConnection);
+	connect(this->chat_network_manager, &ChatNetworkManager::updateUserFriendList, this->userDataBase, &UserDatabaseManager::selectUserData, Qt::QueuedConnection);
 }
 
 void Ornament::deleteChatThread()
@@ -110,6 +134,11 @@ void Ornament::resizeEvent(QResizeEvent* event)
 	if (this->isShowMax)
 		return;
 	this->tool->setGeometry(QRect(QPoint(this->rect().right() - (this->tool->width() + 20), this->rect().top() + 70), QSize(this->tool->size())));
+	if (this->systemNotification->isHidden())
+		this->systemNotification->setGeometry(QRect(QPoint(this->rect().right() + 5, this->rect().top() + 10), QSize(this->systemNotification->size())));
+	else
+		this->systemNotification->setGeometry(QRect(QPoint(this->rect().right() - (this->systemNotification->width() + 10), this->rect().top() + 10), QSize(this->systemNotification->size())));
+	this->systemNotification_Animation->setFrameRange(this->rect().right() + 5, this->rect().right() - (this->systemNotification->width() + 10));
 }
 
 bool Ornament::eventFilter(QObject* target, QEvent* event)
@@ -119,7 +148,7 @@ bool Ornament::eventFilter(QObject* target, QEvent* event)
 
 void Ornament::showEvent(QShowEvent*)
 {
-	HWND hCurWnd = GetForegroundWindow();
+	/*HWND hCurWnd = GetForegroundWindow();
 	DWORD dwMyID = GetCurrentThreadId();
 	DWORD dwCurID = GetWindowThreadProcessId(hCurWnd, NULL);
 	AttachThreadInput(dwCurID, dwMyID, TRUE);
@@ -127,7 +156,7 @@ void Ornament::showEvent(QShowEvent*)
 	AttachThreadInput(dwCurID, dwMyID, FALSE);
 	SwitchToThisWindow((HWND)winId(), TRUE);
 	SetActiveWindow((HWND)winId());
-	this->setFocus();
+	this->setFocus();*/
 }
 
 void Ornament::showTool()
@@ -151,6 +180,19 @@ void Ornament::showAddFriend()
 	this->addFriend->exec();
 }
 
+void Ornament::showSystemNotification()
+{
+	this->systemNotification->isHidden() ? this->systemNotification->show() : this->systemNotification->hide();
+	this->systemNotification_Animation->setDirection(QTimeLine::Forward);
+	this->systemNotification_Animation->stop();
+	this->systemNotification_Animation->start();
+}
+
+void Ornament::SystemNotificationAnimationFrameChanged(int frame)
+{
+	this->systemNotification->move(frame, this->systemNotification->geometry().y());
+}
+
 void Ornament::maxWindowSlot()
 {
 	this->isMaximized() ? this->showNormal() : this->showMaximized();
@@ -158,4 +200,15 @@ void Ornament::maxWindowSlot()
 
 void Ornament::changeEvent(QEvent* event)
 {
+}
+
+void Ornament::mousePressEvent(QMouseEvent* event)
+{
+	if (this->systemNotification_Animation->state() == QTimeLine::Running)
+		return;
+	if (!this->systemNotification->isHidden()) {
+		this->systemNotification_Animation->setDirection(QTimeLine::Backward);
+		//this->systemNotification_Animation->stop();
+		this->systemNotification_Animation->start();
+	}
 }

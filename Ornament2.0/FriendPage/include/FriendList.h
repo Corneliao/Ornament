@@ -5,12 +5,11 @@
 #include <QVBoxLayout>
 #include <QPainter>
 #include <QListWidget>
-#include <QStandardItemModel>
 #include <qsystemtrayicon.h>
 #include "../../Component/include/RoundImage.h"
 #include "../../StyledItemDelegate/include/FriendListDelegate.h"
 #include "../../global.h"
-#include "../../include/SystemTrayIconNotification.h"
+#include "../../Component/include/SystemTrayIconNotification.h"
 class FriendList : public QWidget
 {
 	Q_OBJECT
@@ -19,13 +18,13 @@ public:
 	FriendList(QWidget* parent);
 	~FriendList();
 public:
-	void initializeFriends(const QList<FriendListData> datas);
-	void increaseUserFriendItem(const FriendListData friend_data);
+	void initializeFriends(const QList<UserData> datas);
+	void increaseUserFriendItem(const UserData friend_data);
 	void updateFriendCurrentStatus(const QString& cronyAccount);
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 private:
-	QListView* friend_listView = Q_NULLPTR;
-	QStandardItemModel* model = Q_NULLPTR;
-	QSystemTrayIcon* trayIcon = Q_NULLPTR;
+	QListWidget* friend_list = Q_NULLPTR;
+signals:
+	void createChatWindowSignal(const QListWidgetItem* item);
 };

@@ -22,4 +22,6 @@ signals:
 	void connecterrorSignal();
 	void connectedSignal();
 	void UserLogined(const QString  cronyAccount);
+	void updateUserFriendList(const QString & cronyAccount);  //成功添加好友获取用户数据信息
+	void acceptUserApplication(const QString & userName);
 };

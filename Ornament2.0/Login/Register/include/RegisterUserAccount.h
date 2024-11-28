@@ -12,7 +12,7 @@
 #include "../../Component/include/LineEditComponent.h"
 #include "../../Component/include/ButtonComponent.h"
 #include  "../../../FramelessWindow/include/framelesswindow.h"
-#include "../../../Component/include/SystemNotification.h"
+#include "../../../Component/include/Notification.h"
 class RegisterUserAccount : public FramelessWindow
 {
 	Q_OBJECT
@@ -34,7 +34,7 @@ private:
 	LineEditComponent* userPassword = Q_NULLPTR;
 	ButtonComponent* registerButton = Q_NULLPTR;
 	QByteArray imagebytes;
-	SystemNotification* notification = Q_NULLPTR;
+	Notification* notification = Q_NULLPTR;
 	QTimeLine* animation = Q_NULLPTR;
 signals:
 	void closeWindowSignal();

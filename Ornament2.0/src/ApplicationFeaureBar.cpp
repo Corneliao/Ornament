@@ -14,7 +14,6 @@ ApplicationFeaureBar::ApplicationFeaureBar(QWidget* parent)
 	main_vbox->addSpacing(20);
 
 	this->increaseFeature(QString(":/Resource/ico/RiMessage3Line.png"), QString(":/Resource/ico/RiMessage3Fill.png"), "消息");
-	this->increaseFeature(QString(":/Resource/ico/RiMessage3Line.png"), QString(":/Resource/ico/RiMessage3Fill.png"), "消息");
 	this->increaseFeature(QString(":/Resource/ico/friendIco.png"), QString(":/Resource/ico/friendIco_fill.png"), QString("好友"));
 	main_vbox->addStretch();
 }
@@ -45,6 +44,22 @@ void ApplicationFeaureBar::dealFeatureButtonClicked(const int index)
 		FeatureButton* widget = qobject_cast<FeatureButton*>(item->widget());
 		if (widget != Q_NULLPTR) {
 			if (widget->GetCurrentIndex() != index) {
+				widget->setUnSelected();
+			}
+		}
+	}
+}
+
+void ApplicationFeaureBar::setCurrentFeatureButton(const int index)
+{
+	for (int i = 0; i < this->main_vbox->count(); i++) {
+		QLayoutItem* item = this->main_vbox->itemAt(i);
+		FeatureButton* widget = qobject_cast<FeatureButton*>(item->widget());
+		if (widget != Q_NULLPTR) {
+			if (widget->GetCurrentIndex() == index) {
+				widget->setSelected();
+			}
+			else {
 				widget->setUnSelected();
 			}
 		}
@@ -103,6 +118,12 @@ int FeatureButton::GetCurrentIndex() const
 void FeatureButton::setUnSelected()
 {
 	this->isPressed = false;
+	this->update();
+}
+
+void FeatureButton::setSelected()
+{
+	this->isPressed = true;
 	this->update();
 }
 

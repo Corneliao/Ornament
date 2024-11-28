@@ -45,7 +45,7 @@ RegisterUserAccount::RegisterUserAccount(QWidget* parent)
 	main_vbox->addLayout(vbox_1);
 	main_vbox->addStretch();
 
-	this->notification = new SystemNotification(this);
+	this->notification = new Notification(this);
 	this->notification->setGeometry(QRect(QPoint(this->rect().center().x() - (this->notification->width() / 2), this->rect().top() - (this->notification->height())), QSize(this->notification->size())));
 	this->notification->hide();
 

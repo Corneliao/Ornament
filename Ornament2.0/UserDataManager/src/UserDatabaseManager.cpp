@@ -3,7 +3,7 @@
 UserDatabaseManager::UserDatabaseManager(const QString& connect_name)
 {
 	this->connectName = connect_name;
-	qRegisterMetaType<QList<FriendListData>>("QList<FriendListData>");
+	qRegisterMetaType<QList<UserData>>("QList<UserData>");
 }
 
 UserDatabaseManager::~UserDatabaseManager()
@@ -48,7 +48,6 @@ void UserDatabaseManager::VerifyUserAcocunt(const QString& userAccount, const QS
 				}
 			}
 			emit this->VerifyFailed();
-
 		}
 		else {
 			emit this->VerifyFailed();
@@ -127,7 +126,13 @@ void  UserDatabaseManager::selectUserDataForSearch(const QString& userAccount)
 	emit SearchFriendDataSignal(data);
 }
 
-bool UserDatabaseManager::isExistTheSameUserApplication(const QString& receiver)
+/***************************************************************
+  *  @brief     判断是否已存在好友申请
+  *  @param     receiver 接受者
+  *  @note      好友申请判断
+ **************************************************************/
+
+bool UserDatabaseManager::isExistTheSameUserApplication(const QString& receiver) const
 {
 	//查询是否已存在好友申请
 	QSqlDatabase db = QSqlDatabase::database(this->connectName);
@@ -143,6 +148,10 @@ bool UserDatabaseManager::isExistTheSameUserApplication(const QString& receiver)
 	return false;
 }
 
+/**
+ * @brief 添加临时好友申请
+ * @param receiver
+ */
 void UserDatabaseManager::increaseUserApplicationTemp(const QString& receiver)
 {
 	//判断是否存在此好友
@@ -161,7 +170,17 @@ void UserDatabaseManager::increaseUserApplicationTemp(const QString& receiver)
 		query.bindValue(":receiver", receiver.toInt());
 		if (query.exec()) {
 			emit this->isSendApplication(true);
-			emit this->SendApplicationToServer(receiver);
+			//判断当前好友是否在线，在线则向服务器发送申请通知
+			query.prepare("SELECT onlineStatus FROM UserInfo WHERE userAccount = " + receiver);
+			if (query.exec()) {
+				while (query.next()) {
+					bool status = query.value(0).toBool();
+					if (status)
+						emit this->SendApplicationToServer(receiver);
+					else
+						qDebug() << "当前好友未在线,在线好友申请未发送";
+				}
+			}
 		}
 		else {
 			qDebug() << __FUNCTION__ << __TIME__ << query.lastError();
@@ -172,6 +191,11 @@ void UserDatabaseManager::increaseUserApplicationTemp(const QString& receiver)
 	}
 }
 
+/**
+ * @brief 判断是否已存在此好友
+ * @param userAccount
+ * @return 存在return true 不存在return false
+ */
 bool UserDatabaseManager::isExistTheUser(const QString& userAccount)
 {
 	QSqlDatabase db = QSqlDatabase::database(this->connectName);
@@ -187,9 +211,9 @@ bool UserDatabaseManager::isExistTheUser(const QString& userAccount)
 	return false;
 }
 
-FriendListData UserDatabaseManager::GetUserFriendData(const QString& cronyAccount)
+UserData UserDatabaseManager::GetUserFriendData(const QString& cronyAccount)
 {
-	FriendListData data;
+	UserData data;
 	QSqlDatabase db = QSqlDatabase::database(this->connectName);
 	QSqlQuery query(db);
 	query.prepare("SELECT userName,userHeadByte,onlineStatus FROM UserInfo WHERE userAccount = " + cronyAccount);
@@ -219,17 +243,18 @@ FriendListData UserDatabaseManager::GetUserFriendData(const QString& cronyAccoun
 	else {
 		qDebug() << query.lastError();
 	}
-	return FriendListData();
+	return UserData();
 }
 
+//程序启动时获取好友列表
 void UserDatabaseManager::selectCurrentUserFriends()
 {
 	if (this->connectName != tr("connect_main"))
 		return;
-	QList<FriendListData> datas;
+	QList<UserData> datas;
 	QSqlDatabase db = QSqlDatabase::database(this->connectName);
 	QSqlQuery query(db);
-	FriendListData data;
+	UserData data;
 	query.prepare("SELECT cronyAccount FROM UserCrony WHERE userAccount = " + QString::number(GLOB_UserAccount));
 	if (query.exec()) {
 		while (query.next()) {
@@ -241,6 +266,39 @@ void UserDatabaseManager::selectCurrentUserFriends()
 	emit this->userFriends(datas);
 }
 
+void UserDatabaseManager::selectUserData(const QString& userAccount)
+{
+	UserData data;
+	QSqlDatabase db = QSqlDatabase::database(this->connectName);
+	QSqlQuery query(db);
+	query.prepare("SELECT userName,userHeadByte,onlineStatus FROM UserInfo WHERE userAccount = " + userAccount);
+	if (query.exec()) {
+		while (query.next()) {
+			QString username = query.value(0).toString();
+			QByteArray imagebytes = query.value(1).toByteArray();
+			bool status = query.value(2).toBool();
+			data.status = status;
+			data.userName = username;
+			data.userAccount = userAccount;
+			QPixmap pixmap = RoundImage::RoundImageFromByteArray(imagebytes);
+			data.userHead = pixmap;
+			if (status) {
+				pixmap.load(":/Resource/ico/TwemojiGreenCircle.png");
+				data.status_text = "在线";
+			}
+
+			else {
+				data.status_text = "离线";
+				pixmap.load(":/Resource/ico/TwemojiRedCircle.png");
+			}
+			data.status_ico = pixmap;
+			emit this->userDataSignal(data);
+		}
+	}
+	else {
+		qDebug() << query.lastError();
+	}
+}
 void UserDatabaseManager::iniSql()
 {
 	qDebug() << "数据库子线程" << QThread::currentThreadId();
@@ -257,6 +315,8 @@ void UserDatabaseManager::iniSql()
 
 	else {
 		qDebug() << __FUNCTION__ << __TIME__ << db.lastError();
+		QSqlError error = db.lastError();
+	//	emit this->openDatabaseFailedSignal(error.text());
 		return;
 	}
 

@@ -14,7 +14,7 @@ AddFriend::AddFriend(QDialog* parent)
 	main_vbox->addSpacing(5);
 	main_vbox->addWidget(this->listWidget);
 
-	this->notification = new SystemNotification(this);
+	this->notification = new Notification(this);
 	this->notification->hide();
 
 	this->noticeAnimation = new QPropertyAnimation(this->notification, "geometry", this);
@@ -67,7 +67,6 @@ void AddFriend::increaseSearchMember(const SearchFriendData& data)
 	this->listWidget->addItem(item);
 	this->listWidget->setItemWidget(item, itemWidget);
 	connect(itemWidget, &SearchFriendItemWidget::SendFreindApplication, this, &AddFriend::sendFriendApplication, Qt::DirectConnection);
-	//connect(this, &AddFriend::existTheUserSignal, itemWidget, &SearchFriendItemWidget::ExistTheUser, Qt::DirectConnection);
 }
 
 void AddFriend::sendApplicationSucceedAnimation(bool isSucceed)

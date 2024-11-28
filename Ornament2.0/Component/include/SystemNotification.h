@@ -1,9 +1,11 @@
 ﻿#pragma once
 
 #include <QWidget>
+#include <QVBoxLayout>
 #include <QPainter>
+#include <QListWidget>
 #include <QGraphicsDropShadowEffect>
-#include <QLabel>
+#include "NormalTitleBar.h"
 class SystemNotification : public QWidget
 {
 	Q_OBJECT
@@ -11,11 +13,10 @@ class SystemNotification : public QWidget
 public:
 	SystemNotification(QWidget* parent);
 	~SystemNotification();
-public:
-	void setText(const QString& _text);
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 private:
+	QListWidget* notificationItemList = Q_NULLPTR;
 	QGraphicsDropShadowEffect* shadow = Q_NULLPTR;
-	QLabel* text = Q_NULLPTR;
+	NormalTitleBar* title_bar = Q_NULLPTR;
 };

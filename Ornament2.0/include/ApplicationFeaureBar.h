@@ -18,11 +18,13 @@ class ApplicationFeaureBar : public QWidget
 public:
 	ApplicationFeaureBar(QWidget* parent);
 	~ApplicationFeaureBar();
+	void setCurrentFeatureButton(const int index);
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 private:
 	void increaseFeature(const QString& normal_ico, const QString& select_ico, const QString& ico_text);
 	void dealFeatureButtonClicked(const int index);
+
 private:
 	QVBoxLayout* main_vbox = Q_NULLPTR;
 	AddFriendButton* addfriend_button = Q_NULLPTR;
@@ -48,6 +50,7 @@ public:
 	FeatureButton(const QString& normaIco, const QString& selectedIco, const QString& buttonText, const int index, QWidget* parent = Q_NULLPTR);
 	int GetCurrentIndex()const;
 	void setUnSelected();
+	void setSelected();
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 	void mousePressEvent(QMouseEvent*)Q_DECL_OVERRIDE;

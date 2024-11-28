@@ -38,4 +38,5 @@ private:
 signals:
 	void showToolSignal();
 	void showAddFriendSignal();
+	void showSystemNotification();
 };

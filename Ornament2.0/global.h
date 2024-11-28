@@ -11,6 +11,8 @@ extern QString GLOB_UserName;
 extern QSize screenSize;
 //extern QPixmap GLOB_UserHead;
 
+enum  NoticeType { UserApplication };
+
 struct FeatureBarData {
 	QPixmap normal_ico;
 	QPixmap select_ico;
@@ -20,26 +22,31 @@ struct FeatureBarData {
 struct UserData {
 	QPixmap userHead;
 	QString userName;
-	int userAccount = 0;
+	QString userAccount;
 	bool status = false;
+	QPixmap status_ico;
+	QString status_text;
+	QString userMessage;
+	int index = 0;
 };
 
-struct FriendChatData {
-	QPixmap userHead;
-	QString userName;
-	QString userMessage;
-};
+//struct FriendChatData {
+//	QPixmap userHead;
+//	QString userName;
+//	QString userMessage;
+//	bool status = false;
+//};
 struct SearchFriendData {
 	QByteArray imagebytes;
 	QString userName;
 	bool status;
 	QString userAccount;
 };
-struct FriendListData {
-	QPixmap userHead;
-	QString userName;
-	bool status = false;
-	QString userAccount;
-	QPixmap status_ico;
-	QString status_text;
-};
+//struct FriendListData {
+//	QPixmap userHead;
+//	QString userName;
+//	bool status = false;
+//	QString userAccount;
+//	QPixmap status_ico;
+//	QString status_text;
+//};

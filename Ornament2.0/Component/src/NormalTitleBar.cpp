@@ -4,6 +4,7 @@ NormalTitleBar::NormalTitleBar(const QString& text, QWidget* parent)
 	: QWidget(parent)
 {
 	QHBoxLayout* main_lay = new QHBoxLayout(this);
+	//main_lay->setContentsMargins(9, 0, 9, 9);
 	this->setLayout(main_lay);
 
 	QFont font;
@@ -31,6 +32,14 @@ NormalTitleBar::NormalTitleBar(const QString& text, QWidget* parent)
 
 NormalTitleBar::~NormalTitleBar()
 {
+}
+
+void NormalTitleBar::setCloseVisible(bool visible)
+{
+	if (visible)
+		this->close_window->hide();
+	else
+		this->close_window->show();
 }
 
 bool NormalTitleBar::eventFilter(QObject* target, QEvent* event)

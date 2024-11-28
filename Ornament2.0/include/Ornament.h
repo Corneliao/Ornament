@@ -8,6 +8,8 @@
 #include <QStackedLayout>
 #include <QResizeEvent>
 #include <QApplication>
+#include <QTimeLine>
+#include "../Component/include/SystemNotification.h"
 #include "../FramelessWindow/include/framelesswindow.h"
 #include "../UserDataManager/include/UserDatabaseManager.h"
 #include "ApplicationTitleBar.h"
@@ -17,7 +19,6 @@
 #include "ChatNetworkManager.h"
 #include "../FriendPage/include/FriendPage.h"
 #include "AddFriend.h"
-#include "SystemTrayIconNotification.h"
 class Ornament : public FramelessWindow
 {
 	Q_OBJECT
@@ -32,11 +33,13 @@ protected:
 	bool eventFilter(QObject* target, QEvent* event)Q_DECL_OVERRIDE;
 	void showEvent(QShowEvent*)Q_DECL_OVERRIDE;
 	void changeEvent(QEvent* event)Q_DECL_OVERRIDE;
+	void mousePressEvent(QMouseEvent* event)Q_DECL_OVERRIDE;
 private:
 	void showTool();
 	void showAddFriend();
+	void showSystemNotification();
+	void SystemNotificationAnimationFrameChanged(int frame);
 	void maxWindowSlot();
-
 private:
 	ApplicationTitleBar* application_title_Bar = Q_NULLPTR;
 	ApplicationFeaureBar* application_feature_Bar = Q_NULLPTR;
@@ -50,6 +53,8 @@ private:
 	ChatNetworkManager* chat_network_manager = Q_NULLPTR;
 	FriendPage* friend_page = Q_NULLPTR;
 	AddFriend* addFriend = Q_NULLPTR;
+	SystemNotification* systemNotification = Q_NULLPTR;
+	QTimeLine* systemNotification_Animation = Q_NULLPTR;
 signals:
 	void ToolStateSignal(bool isShow);
 	void searchFriendSignal(const QString& userAccount);
@@ -57,4 +62,5 @@ signals:
 	void SendFriendApplication(const QString& receiverAccount);
 	void isSendApplication(bool isSucceed);
 	void existTheUserSignal();
+	//void createChatWindowSignal();
 };

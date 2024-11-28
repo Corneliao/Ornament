@@ -24,11 +24,12 @@ public:
 	bool isExistTheSameUserAccount(const int account);
 	void RegisterUserAccount(const QByteArray& imageBytes, const QString& userName, const QString& userPassword);
 	void selectUserDataForSearch(const QString& userAccount);
-	bool isExistTheSameUserApplication(const QString& receiver);
+	bool isExistTheSameUserApplication(const QString& receiver) const;
 	void increaseUserApplicationTemp(const QString& receiver);
 	bool isExistTheUser(const QString& userAccount);
-	FriendListData GetUserFriendData(const QString& cronyAccount); //
+	UserData GetUserFriendData(const QString& cronyAccount); //
 	void selectCurrentUserFriends();
+	void selectUserData(const QString& userAccount);
 
 signals:
 	void closedDatabaseSignal();
@@ -42,7 +43,9 @@ signals:
 	void SendApplicationToServer(const QString& receiver);
 	void isSendApplication(bool isSucceed);
 	void existTheUserSignal();
-	void userFriends(QList<FriendListData> datas);
+	void userFriends(QList<UserData> datas);
+	void userDataSignal(const UserData& user_data);
+	//void openDatabaseFailedSignal(const QString& error);
 private:
 	QPixmap pixmap_temp;
 	QString connectName = "connected_forlogin";

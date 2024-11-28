@@ -12,51 +12,46 @@ FriendList::FriendList(QWidget* parent)
 
 	QPalette pale;
 	pale.setColor(QPalette::Window, Qt::transparent);
-	this->friend_listView = new QListView(this);
-	this->friend_listView->setPalette(pale);
-	this->friend_listView->setFrameShape(QFrame::NoFrame);
+	this->friend_list = new QListWidget(this);
+	this->friend_list->setPalette(pale);
+	this->friend_list->setFrameShape(QFrame::NoFrame);
 	FriendListDelegate* delegate = new FriendListDelegate(this);
-	this->friend_listView->setItemDelegate(delegate);
-	this->model = new QStandardItemModel(this);
-	this->friend_listView->setModel(this->model);
-	main_vbox->addWidget(friend_listView);
+	this->friend_list->setItemDelegate(delegate);
+	main_vbox->addWidget(friend_list);
 
-	//this->trayIcon = new QSystemTrayIcon(this);
-	//this->trayIcon->setIcon(QIcon(":/Resource/ico/TablerBrandUnity.png"));
-	//this->trayIcon->setToolTip("Ornament");
-	//this->trayIcon->show();
+	connect(this->friend_list, &QListWidget::itemDoubleClicked, this, &FriendList::createChatWindowSignal, Qt::DirectConnection);
 }
 
 FriendList::~FriendList()
 {
 }
 
-void FriendList::initializeFriends(const QList<FriendListData> datas)
+void FriendList::initializeFriends(const QList<UserData> datas)
 {
-	for (const FriendListData data : datas)
+	for (const UserData data : datas)
 		this->increaseUserFriendItem(data);
 }
 
-void FriendList::increaseUserFriendItem(const FriendListData friend_data)
+void FriendList::increaseUserFriendItem(const UserData friend_data)
 {
-	QStandardItem* item = new QStandardItem();
-	item->setData(QVariant::fromValue(friend_data), Qt::UserRole);
-	this->model->appendRow(item);
+	QListWidgetItem* item = new QListWidgetItem(this->friend_list);
+	item->setData(Qt::UserRole, QVariant::fromValue(friend_data));
+	this->friend_list->addItem(item);
 }
 
 void FriendList::updateFriendCurrentStatus(const QString& cronyAccount)
 {
-	if (this->model->rowCount() == 0)
+	if (this->friend_list->count() == 0)
 		return;
 
-	for (int i = 0; i < this->model->rowCount(); i++) {
-		QStandardItem* item = this->model->item(i, 0);
-		FriendListData data = item->data(Qt::UserRole).value<FriendListData>();
+	for (int i = 0; i < this->friend_list->count(); i++) {
+		QListWidgetItem* item = this->friend_list->item(i);
+		UserData data = item->data(Qt::UserRole).value<UserData>();
 		if (data.userAccount == cronyAccount) {
 			QPixmap pixmap(":/Resource/ico/TwemojiGreenCircle.png");
 			data.status_ico = pixmap;
 			data.status_text = "在线";
-			item->setData(QVariant::fromValue(data), Qt::UserRole);
+			item->setData(Qt::UserRole, QVariant::fromValue(data));
 			//this->trayIcon->showMessage(data.userName, "你的好友已上线", data.userHead.scaled(QSize(100 * GLOB_ScaleDpi, 100 * GLOB_ScaleDpi), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 			SystemTrayIconNotification::getInstence()->showMessage(data.userName, "你的好友已上线", data.userHead.scaled(QSize(100 * GLOB_ScaleDpi, 100 * GLOB_ScaleDpi), Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 			return;

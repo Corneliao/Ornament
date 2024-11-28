@@ -14,7 +14,7 @@
 #include "../FramelessWindow/include/framelesswindow.h"
 #include "../Component/include/LineEdit.h"
 #include "../StyledItemDelegate/include/SearchFriendItemWidget.h"
-#include "../Component/include/SystemNotification.h"
+#include "../Component/include/Notification.h"
 
 class AddFriend : public FranelessWindowForDialog
 {
@@ -46,7 +46,7 @@ private:
 	bool isDraging = false;
 	QPoint startPoint;
 	QPoint m_offset;
-	SystemNotification* notification = Q_NULLPTR;
+	Notification* notification = Q_NULLPTR;
 	QPropertyAnimation* noticeAnimation = Q_NULLPTR;
 	QTimer* noticeBackTimer = Q_NULLPTR;
 signals:

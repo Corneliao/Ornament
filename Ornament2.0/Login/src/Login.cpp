@@ -57,7 +57,7 @@ Login::Login(QWidget* parent)
 	this->login_button_animation->setDuration(200);
 	this->login_button_animation->setEasingCurve(QEasingCurve::InOutQuad);
 
-	this->login_notification = new SystemNotification(this);
+	this->login_notification = new Notification(this);
 	this->login_notification->setGeometry(QRect(QPoint(this->rect().center().x() - (this->login_notification->width() / 2), this->rect().top() - (this->login_notification->height())), QSize(this->login_notification->size())));
 
 	this->login_notification_animation = new QPropertyAnimation(this->login_notification, "geometry", this);

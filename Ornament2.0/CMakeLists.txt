@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.16)
-project(Ornament2.0 LANGUAGES CXX)
+project(Ornament LANGUAGES CXX)
 
 include(qt.cmake)
 
@@ -65,14 +65,15 @@ set(PROJECT_SOURCES
     ${FRIENDPAGE_SOURCE_FILES}
 )
 
-qt_add_executable(Ornament2.0 ${PROJECT_SOURCES})
+qt_add_executable(Ornament ${PROJECT_SOURCES})
 
-set_target_properties(Ornament2.0
+set_target_properties(Ornament
     PROPERTIES
         WIN32_EXECUTABLE TRUE
+        OUTPUT_NAME "Ornament"
 )
 
-target_link_libraries(Ornament2.0
+target_link_libraries(Ornament
     PUBLIC
         Qt6::Core
         Qt6::Gui
