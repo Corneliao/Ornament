@@ -44,10 +44,10 @@ SystemNotification::SystemNotification(QWidget* parent)
 	this->shadow->setColor(Qt::gray);
 	this->setGraphicsEffect(this->shadow);
 
-	UserData data;
-	data.userHead = RoundImage::RoundImageFromStringPath("D:\\Doga\\WallPaper\\b_7ee3bc45e31b578427bd985ae04f0ab9.png");
-	data.userName = "Doga酱";
-	this->IncreaseUserApplicationItem(data);
+	//UserData data;
+	//data.userHead = RoundImage::RoundImageFromStringPath("D:\\Doga\\WallPaper\\b_7ee3bc45e31b578427bd985ae04f0ab9.png");
+	//data.userName = "Doga酱";
+	//this->IncreaseUserApplicationItem(data);
 }
 
 SystemNotification::~SystemNotification()
@@ -63,8 +63,15 @@ void SystemNotification::IncreaseUserApplicationItem(const UserData& user_data)
 	item->setSizeHint(QSize(itemWidget->size()));
 	this->userApplicationNotificationItemList->addItem(item);
 	this->userApplicationNotificationItemList->setItemWidget(item, itemWidget);
-	connect(itemWidget, &UserApplicationItemWidget::agreenApplicationSignal, this, &SystemNotification::agreeApplicationSignal, Qt::DirectConnection);
+	connect(itemWidget, &UserApplicationItemWidget::agreenApplicationSignal, this, &SystemNotification::dealAgreeApplication, Qt::DirectConnection);
 	connect(itemWidget, &UserApplicationItemWidget::disAgreeApplicationSignal, this, &SystemNotification::removeApplicationItem, Qt::DirectConnection);
+	connect(itemWidget, &UserApplicationItemWidget::updateCurrentUserFriendList, this, &SystemNotification::updateFriendList, Qt::DirectConnection);
+}
+
+void SystemNotification::dealAgreeApplication(const QString& cronyAccount)
+{
+	emit this->agreeApplicationSignal(cronyAccount);
+	this->removeApplicationItem();
 }
 
 void SystemNotification::paintEvent(QPaintEvent*)
@@ -79,9 +86,6 @@ void SystemNotification::paintEvent(QPaintEvent*)
 void SystemNotification::removeApplicationItem()
 {
 	UserApplicationItemWidget* itemWidget = qobject_cast<UserApplicationItemWidget*>(this->sender());
-	//this->userApplicationNotificationItemList->itemAt
-	//itemWidget->deleteLater();
-	//itemWidget = Q_NULLPTR;
 	for (int i = 0; i < this->userApplicationNotificationItemList->count(); i++) {
 		QListWidgetItem* item = this->userApplicationNotificationItemList->item(i);
 		if (itemWidget == this->userApplicationNotificationItemList->itemWidget(item)) {

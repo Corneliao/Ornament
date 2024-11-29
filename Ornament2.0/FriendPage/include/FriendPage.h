@@ -13,6 +13,7 @@ public:
 	FriendPage(QWidget* parent);
 	~FriendPage();
 	void updateFriendCurrentStatus(const QString& cronyAccount);
+	void IncreaseNewUserItem(const UserData& user_data);
 private:
 	FriendInfo* friend_info = Q_NULLPTR;
 	FriendList* friend_list = Q_NULLPTR;

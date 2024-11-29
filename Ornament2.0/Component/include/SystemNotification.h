@@ -17,6 +17,7 @@ public:
 	~SystemNotification();
 public:
 	void IncreaseUserApplicationItem(const UserData& user_data);
+	void dealAgreeApplication(const QString& cronyAccount);
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 	void removeApplicationItem();
@@ -31,4 +32,5 @@ signals:
 	void agreeApplicationSignal(const QString& userAccount);
 	void disAgreeApplicationSignal();
 	void NotificationEmptySignal();
+	void updateFriendList(const UserData& user_data);
 };

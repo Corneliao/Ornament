@@ -23,3 +23,8 @@ void FriendPage::updateFriendCurrentStatus(const QString& cronyAccount)
 {
 	this->friend_list->updateFriendCurrentStatus(cronyAccount);
 }
+
+void FriendPage::IncreaseNewUserItem(const UserData& user_data)
+{
+	this->friend_list->increaseUserFriendItem(user_data);
+}

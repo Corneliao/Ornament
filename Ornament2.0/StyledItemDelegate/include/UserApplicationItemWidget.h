@@ -28,6 +28,7 @@ private:
 signals:
 	void agreenApplicationSignal(const QString cronyAccount);
 	void disAgreeApplicationSignal();
+	void updateCurrentUserFriendList(const UserData& user_data);
 };
 
 class UserApplicationButton :public QWidget

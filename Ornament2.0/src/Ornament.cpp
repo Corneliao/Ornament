@@ -44,7 +44,9 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	this->systemNotification->setGeometry(QRect(QPoint(this->rect().right() + 5, this->rect().center().y() - (this->systemNotification->height() / 2)), QSize(this->systemNotification->size())));
 	this->systemNotification->hide();
 
-	this->systemNotification_Animation = new QTimeLine(700, this);
+	connect(this->systemNotification, &SystemNotification::updateFriendList, this->friend_page, &FriendPage::IncreaseNewUserItem, Qt::DirectConnection);
+
+	this->systemNotification_Animation = new QTimeLine(300, this);
 	this->systemNotification_Animation->setEasingCurve(QEasingCurve::InOutSine);
 	this->systemNotification_Animation->setUpdateInterval(0);
 	this->systemNotification_Animation->setFrameRange(this->rect().right() + 5, this->rect().right() - (this->systemNotification->width() + 10));
@@ -79,7 +81,6 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	connect(this->chat_network_manager, &ChatNetworkManager::connectedSignal, this, &Ornament::startSqlThread, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::connecterrorSignal, this, &Ornament::deleteChatThread, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::UserLogined, this->friend_page, &FriendPage::updateFriendCurrentStatus, Qt::QueuedConnection);
-	//connect(this->systemNotification, &SystemNotification::agreeApplicationSignal, this->chat_network_manager, &ChatNetworkManager::acceptApplication,Qt::QueuedConnection);
 }
 
 Ornament::~Ornament()
@@ -103,13 +104,13 @@ void Ornament::startSqlThread()
 	connect(this->userDataBase, &UserDatabaseManager::isSendApplication, this, &Ornament::isSendApplication, Qt::QueuedConnection);
 	connect(this->userDataBase, &UserDatabaseManager::existTheUserSignal, this, &Ornament::existTheUserSignal, Qt::QueuedConnection);
 	connect(this->userDataBase, &UserDatabaseManager::userFriends, this->friend_page, &FriendPage::userFriendList, Qt::QueuedConnection);
-	//connect(this->chat_network_manager, &ChatNetworkManager::updateUserFriendList, this->userDataBase, &UserDatabaseManager::selectUserData, Qt::QueuedConnection)
-	// 好友发送申请验证;
+
 	connect(this->chat_network_manager, &ChatNetworkManager::acceptUserApplication, this->userDataBase, &UserDatabaseManager::selectUserData, Qt::QueuedConnection);
 	connect(this->userDataBase, &UserDatabaseManager::userDataSignal, this, &Ornament::dealUserApplication, Qt::QueuedConnection);
 	connect(this->systemNotification, &SystemNotification::agreeApplicationSignal, this->userDataBase, &UserDatabaseManager::addUserFriend, Qt::QueuedConnection);
 	connect(this->userDataBase, &UserDatabaseManager::AcceptedApplicationSignal, this->chat_network_manager, &ChatNetworkManager::acceptApplication, Qt::QueuedConnection);
-	//connect(this->chat_network_manager,&ChatNetworkManager::updateUserFriendList,this,)
+	connect(this->chat_network_manager, &ChatNetworkManager::updateUserFriendList, this->userDataBase, &UserDatabaseManager::selectUserData, Qt::QueuedConnection);
+	connect(this->userDataBase, &UserDatabaseManager::updateFriendListDataSignal, this->friend_page, &FriendPage::IncreaseNewUserItem, Qt::QueuedConnection);
 }
 
 void Ornament::deleteChatThread()
@@ -163,9 +164,10 @@ void Ornament::showEvent(QShowEvent*)
 	SwitchToThisWindow((HWND)winId(), TRUE);
 	SetActiveWindow((HWND)winId());
 	this->setFocus();*/
-	qDebug() << "显示";
-	this->setWindowState(Qt::WindowActive);
-	this->activateWindow();
+	//	qDebug() << "显示";
+	//	this->setWindowState(Qt::WindowActive);
+	//	this->activateWindow();
+	//
 }
 
 void Ornament::showTool()
@@ -192,6 +194,7 @@ void Ornament::showAddFriend()
 void Ornament::showSystemNotification()
 {
 	this->systemNotification->isHidden() ? this->systemNotification->show() : this->systemNotification->hide();
+	this->systemNotification->raise();
 	this->systemNotification_Animation->setDirection(QTimeLine::Forward);
 	this->systemNotification_Animation->stop();
 	this->systemNotification_Animation->start();

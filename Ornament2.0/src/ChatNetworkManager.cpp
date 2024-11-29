@@ -64,12 +64,12 @@ void ChatNetworkManager::ReadData()
 	else if (type == MSGTYPE::WaitAcceptApplication) {
 		QString sender;
 		stream >> sender;
-		emit this->acceptUserApplication(sender);
+		emit this->acceptUserApplication(sender, USERDATATYPE::UserApplicationData);
 	}
 	else if (type == MSGTYPE::AcceptedApplication) {
 		QString receiverAccount;
 		stream >> receiverAccount;
-		emit this->updateUserFriendList(receiverAccount);
+		emit this->updateUserFriendList(receiverAccount, USERDATATYPE::UpdateUserFriend);
 	}
 }
 

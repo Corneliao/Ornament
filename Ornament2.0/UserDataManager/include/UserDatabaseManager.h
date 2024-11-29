@@ -17,7 +17,7 @@ public:
 	UserDatabaseManager(const QString& connect_name);
 	~UserDatabaseManager();
 public:
-	void iniSql();
+	void iniSql(); //初始化数据库
 	void selectUserHeadData(const QString& userAccount);
 	void closeDatabase();
 	void VerifyUserAcocunt(const QString& userAccount, const  QString& userPassword);
@@ -26,10 +26,10 @@ public:
 	void selectUserDataForSearch(const QString& userAccount);
 	bool isExistTheSameUserApplication(const QString& receiver) const;
 	void increaseUserApplicationTemp(const QString& receiver);
-	bool isExistTheUser(const QString& userAccount);
-	UserData GetUserFriendData(const QString& cronyAccount); //
+	bool isExistTheUser(const QString& userAccount) const;
+	UserData GetUserFriendData(const QString& cronyAccount) const; //
 	void selectCurrentUserFriends();
-	void selectUserData(const QString& userAccount);
+	void selectUserData(const QString& userAccount, int type);
 	void addUserFriend(const QString& userAccount);
 
 signals:
@@ -46,6 +46,7 @@ signals:
 	void existTheUserSignal();
 	void userFriends(QList<UserData> datas);
 	void userDataSignal(const UserData& user_data);
+	void updateFriendListDataSignal(const UserData& user_data);
 	//void openDatabaseFailedSignal(const QString& error);
 	void AcceptedApplicationSignal(const QString& userAccount);
 private:

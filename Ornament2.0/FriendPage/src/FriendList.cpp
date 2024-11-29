@@ -32,10 +32,10 @@ void FriendList::initializeFriends(const QList<UserData> datas)
 		this->increaseUserFriendItem(data);
 }
 
-void FriendList::increaseUserFriendItem(const UserData friend_data)
+void FriendList::increaseUserFriendItem(const UserData& user_data)
 {
 	QListWidgetItem* item = new QListWidgetItem(this->friend_list);
-	item->setData(Qt::UserRole, QVariant::fromValue(friend_data));
+	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
 	this->friend_list->addItem(item);
 }
 

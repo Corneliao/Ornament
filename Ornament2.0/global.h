@@ -12,6 +12,7 @@ extern QSize screenSize;
 //extern QPixmap GLOB_UserHead;
 
 enum  NoticeType { UserApplication };
+enum USERDATATYPE { UserApplicationData = 0, UpdateUserFriend };
 
 struct FeatureBarData {
 	QPixmap normal_ico;

@@ -19,7 +19,7 @@ public:
 	~FriendList();
 public:
 	void initializeFriends(const QList<UserData> datas);
-	void increaseUserFriendItem(const UserData friend_data);
+	void increaseUserFriendItem(const UserData& friend_data);
 	void updateFriendCurrentStatus(const QString& cronyAccount);
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;

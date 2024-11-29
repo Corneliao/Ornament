@@ -59,6 +59,7 @@ bool UserApplicationItemWidget::eventFilter(QObject* target, QEvent* event)
 	if (this->agree == target) {
 		if (event->type() == QEvent::MouseButtonPress) {
 			emit this->agreenApplicationSignal(this->m_userData.userAccount);
+			emit this->updateCurrentUserFriendList(this->m_userData);
 			return true;
 		}
 	}

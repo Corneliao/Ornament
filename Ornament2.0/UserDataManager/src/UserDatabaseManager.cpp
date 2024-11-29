@@ -55,6 +55,11 @@ void UserDatabaseManager::VerifyUserAcocunt(const QString& userAccount, const QS
 	}
 }
 
+/**
+ * @brief 注册账号时判断是否已存在账号 存在则随机生成
+ * @param account
+ * @return
+ */
 bool UserDatabaseManager::isExistTheSameUserAccount(const int account)
 {
 	{
@@ -76,6 +81,12 @@ bool UserDatabaseManager::isExistTheSameUserAccount(const int account)
 	}
 }
 
+/**
+ * @brief 注册账号
+ * @param imageBytes
+ * @param userName
+ * @param userPassword
+ */
 void UserDatabaseManager::RegisterUserAccount(const QByteArray& imageBytes, const QString& userName, const QString& userPassword)
 {
 	{
@@ -102,6 +113,10 @@ void UserDatabaseManager::RegisterUserAccount(const QByteArray& imageBytes, cons
 	}
 }
 
+/**
+ * @brief 获取搜索时用户数据
+ * @param userAccount
+ */
 void  UserDatabaseManager::selectUserDataForSearch(const QString& userAccount)
 {
 	if (userAccount == QString::number(GLOB_UserAccount))
@@ -126,11 +141,12 @@ void  UserDatabaseManager::selectUserDataForSearch(const QString& userAccount)
 	emit SearchFriendDataSignal(data);
 }
 
-/***************************************************************
-  *  @brief     判断是否已存在好友申请
-  *  @param     receiver 接受者
-  *  @note      好友申请判断
- **************************************************************/
+
+/**
+ * @brief 判断是否已存在好友申请
+ * @param receiver
+ * @return
+ */
 
 bool UserDatabaseManager::isExistTheSameUserApplication(const QString& receiver) const
 {
@@ -196,7 +212,7 @@ void UserDatabaseManager::increaseUserApplicationTemp(const QString& receiver)
  * @param userAccount
  * @return 存在return true 不存在return false
  */
-bool UserDatabaseManager::isExistTheUser(const QString& userAccount)
+bool UserDatabaseManager::isExistTheUser(const QString& userAccount) const
 {
 	QSqlDatabase db = QSqlDatabase::database(this->connectName);
 	QSqlQuery query(db);
@@ -211,7 +227,12 @@ bool UserDatabaseManager::isExistTheUser(const QString& userAccount)
 	return false;
 }
 
-UserData UserDatabaseManager::GetUserFriendData(const QString& cronyAccount)
+/**
+ * @brief 程序启动时获取用户信息
+ * @param cronyAccount
+ * @return
+ */
+UserData UserDatabaseManager::GetUserFriendData(const QString& cronyAccount) const
 {
 	UserData data;
 	QSqlDatabase db = QSqlDatabase::database(this->connectName);
@@ -266,7 +287,12 @@ void UserDatabaseManager::selectCurrentUserFriends()
 	emit this->userFriends(datas);
 }
 
-void UserDatabaseManager::selectUserData(const QString& userAccount)
+/**
+ * @brief 获取用户数据
+ * @param userAccount
+ * @param type 返回用户数据的类型
+ */
+void UserDatabaseManager::selectUserData(const QString& userAccount, int type)
 {
 	UserData data;
 	QSqlDatabase db = QSqlDatabase::database(this->connectName);
@@ -292,14 +318,21 @@ void UserDatabaseManager::selectUserData(const QString& userAccount)
 				pixmap.load(":/Resource/ico/TwemojiRedCircle.png");
 			}
 			data.status_ico = pixmap;
-			emit this->userDataSignal(data);
+			if (type == USERDATATYPE::UserApplicationData)
+				emit this->userDataSignal(data);
+			else if (type == USERDATATYPE::UpdateUserFriend)
+				emit this->updateFriendListDataSignal(data);
 		}
 	}
 	else {
 		qDebug() << query.lastError();
 	}
 }
-//
+
+/**
+ * @brief 添加好友至数据库
+ * @param userAccount
+ */
 void UserDatabaseManager::addUserFriend(const QString& userAccount)
 {
 	QSqlDatabase db = QSqlDatabase::database(this->connectName);
@@ -321,6 +354,10 @@ void UserDatabaseManager::addUserFriend(const QString& userAccount)
 		emit AcceptedApplicationSignal(userAccount);
 	}
 }
+
+/**
+ * @brief 初始化数据库
+ */
 void UserDatabaseManager::iniSql()
 {
 	qDebug() << "数据库子线程" << QThread::currentThreadId();
@@ -345,6 +382,10 @@ void UserDatabaseManager::iniSql()
 	this->selectCurrentUserFriends();
 }
 
+/**
+ * @brief 获取用户头像
+ * @param userAccount
+ */
 void UserDatabaseManager::selectUserHeadData(const QString& userAccount)
 {
 	if (userAccount.isEmpty() || userAccount.length() <= 8)
