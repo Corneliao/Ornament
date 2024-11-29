@@ -299,6 +299,28 @@ void UserDatabaseManager::selectUserData(const QString& userAccount)
 		qDebug() << query.lastError();
 	}
 }
+//
+void UserDatabaseManager::addUserFriend(const QString& userAccount)
+{
+	QSqlDatabase db = QSqlDatabase::database(this->connectName);
+	QSqlQuery query(db);
+	query.prepare("INSERT INTO UserCrony (userAccount,cronyAccount) VALUES (:user,:crony);");
+	query.bindValue(":user", GLOB_UserAccount);
+	query.bindValue(":crony", userAccount);
+	bool ret = query.exec();
+
+	query.prepare("INSERT INTO UserCrony (userAccount,cronyAccount) VALUES (:user,:crony);");
+	query.bindValue(":user", userAccount);
+	query.bindValue(":crony", GLOB_UserAccount);
+	if (ret && query.exec()) {
+		qDebug() << "添加好友成功";
+		query.prepare("DELETE FROM CronyApplicationTemp WHERE senderAccount = " + userAccount + " AND receiverAccount = " + QString::number(GLOB_UserAccount));
+		if (query.exec()) {
+			qDebug() << "删除申请记录";
+		}
+		emit AcceptedApplicationSignal(userAccount);
+	}
+}
 void UserDatabaseManager::iniSql()
 {
 	qDebug() << "数据库子线程" << QThread::currentThreadId();
@@ -316,7 +338,7 @@ void UserDatabaseManager::iniSql()
 	else {
 		qDebug() << __FUNCTION__ << __TIME__ << db.lastError();
 		QSqlError error = db.lastError();
-	//	emit this->openDatabaseFailedSignal(error.text());
+		//	emit this->openDatabaseFailedSignal(error.text());
 		return;
 	}
 

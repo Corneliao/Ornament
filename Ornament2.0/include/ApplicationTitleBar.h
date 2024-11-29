@@ -20,6 +20,7 @@ public:
 	void setUserHead(const QByteArray& imagebytes);
 	void setUnfoldIcon(bool isShow);
 	void setOnlineStatus(bool isOnline);
+	void setNotificationUnread(bool unread);
 protected:
 	QPixmap setIconDpi(const QSize& size, const QPixmap& pixmap);
 	bool eventFilter(QObject* target, QEvent* event)Q_DECL_OVERRIDE;
@@ -32,9 +33,10 @@ private:
 	QPixmap user_head_pixmap;
 	QLabel* unfold = Q_NULLPTR;
 	QLabel* search = Q_NULLPTR;
-	QLabel* notification = Q_NULLPTR;
+	IconWithRedPoint* notification = Q_NULLPTR;
 	OnlineStatus* online_status = Q_NULLPTR;
 	AddFriend* add_friend = Q_NULLPTR;
+	//IconWithRedPoint * notification
 signals:
 	void showToolSignal();
 	void showAddFriendSignal();

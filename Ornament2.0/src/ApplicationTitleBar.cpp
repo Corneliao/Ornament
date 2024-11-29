@@ -40,12 +40,12 @@ ApplicationTitleBar::ApplicationTitleBar(QWidget* parent)
 	this->search->setPixmap(pixmap);
 	this->search->installEventFilter(this);
 
-	this->notification = new QLabel(this);
-	this->notification->setCursor(Qt::PointingHandCursor);
-	this->notification->setFixedSize(18, 18);
-	this->notification->setScaledContents(true);
 	pixmap.load(":/Resource/ico/RiNotification3Line.png");
-	this->notification->setPixmap(pixmap);
+	this->notification = new IconWithRedPoint(QSize(28, 28), pixmap, this);
+	this->notification->setCursor(Qt::PointingHandCursor);
+	//this->notification->setScaledContents(true);
+
+	//this->notification->setPixmap(pixmap);
 	this->notification->installEventFilter(this);
 
 	//--------------------
@@ -104,6 +104,11 @@ void ApplicationTitleBar::setUnfoldIcon(bool isShow)
 void ApplicationTitleBar::setOnlineStatus(bool isOnline)
 {
 	this->online_status->setOnlineStatus(isOnline);
+}
+
+void ApplicationTitleBar::setNotificationUnread(bool unread)
+{
+	this->notification->isUnread(unread);
 }
 
 QPixmap ApplicationTitleBar::setIconDpi(const QSize& size, const QPixmap& pixmap)

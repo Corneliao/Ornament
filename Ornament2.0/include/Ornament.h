@@ -40,6 +40,7 @@ private:
 	void showSystemNotification();
 	void SystemNotificationAnimationFrameChanged(int frame);
 	void maxWindowSlot();
+	void dealUserApplication(const UserData& user_data);
 private:
 	ApplicationTitleBar* application_title_Bar = Q_NULLPTR;
 	ApplicationFeaureBar* application_feature_Bar = Q_NULLPTR;

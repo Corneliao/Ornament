@@ -4,12 +4,11 @@ IconWithRedPoint::IconWithRedPoint(const QSize& size, const QPixmap& pixmap, QWi
 	: QWidget(parent)
 {
 	this->setFixedSize(size);
-
 	this->ico = new QLabel(this);
-	this->ico->setFixedSize(size.width() - 10, size.height() - 10);
+	this->ico->setFixedSize(18, 18);
 	this->ico->setScaledContents(true);
-	//QPixmap pixmap();
 	this->ico->setPixmap(pixmap);
+	this->ico->setGeometry(QRect(QPoint(this->rect().center().x() - (this->ico->width() / 2), this->rect().center().y() - (this->ico->height() / 2)), QSize(this->ico->size())));
 }
 
 IconWithRedPoint::~IconWithRedPoint()
@@ -21,11 +20,18 @@ void IconWithRedPoint::setIcon(const QPixmap& pixmap)
 	this->ico->setPixmap(pixmap);
 }
 
+void IconWithRedPoint::isUnread(bool unread)
+{
+	this->m_isUnread = unread;
+	this->update();
+}
 void IconWithRedPoint::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
-	painter.setPen(Qt::NoPen);
-	painter.setBrush(Qt::red);
-	painter.drawEllipse(QRect(QPoint(this->rect().right() - 10, this->rect().bottom() - 10), QSize(10, 10)));
+	if (this->m_isUnread) {
+		painter.setPen(Qt::NoPen);
+		painter.setBrush(Qt::red);
+		painter.drawEllipse(QRect(QPoint(this->rect().right() - 10, this->rect().top() + 1), QSize(6, 6)));
+	}
 }

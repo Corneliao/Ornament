@@ -30,6 +30,7 @@ public:
 	UserData GetUserFriendData(const QString& cronyAccount); //
 	void selectCurrentUserFriends();
 	void selectUserData(const QString& userAccount);
+	void addUserFriend(const QString& userAccount);
 
 signals:
 	void closedDatabaseSignal();
@@ -46,6 +47,7 @@ signals:
 	void userFriends(QList<UserData> datas);
 	void userDataSignal(const UserData& user_data);
 	//void openDatabaseFailedSignal(const QString& error);
+	void AcceptedApplicationSignal(const QString& userAccount);
 private:
 	QPixmap pixmap_temp;
 	QString connectName = "connected_forlogin";

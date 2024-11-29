@@ -4,11 +4,11 @@ NormalTitleBar::NormalTitleBar(const QString& text, QWidget* parent)
 	: QWidget(parent)
 {
 	QHBoxLayout* main_lay = new QHBoxLayout(this);
-	//main_lay->setContentsMargins(9, 0, 9, 9);
+	main_lay->setContentsMargins(0, 9, 9, 9);
 	this->setLayout(main_lay);
 
 	QFont font;
-	font.setPixelSize(12);
+	font.setPixelSize(14);
 	font.setBold(true);
 	this->title = new QLabel(text, this);
 	this->title->setFont(font);

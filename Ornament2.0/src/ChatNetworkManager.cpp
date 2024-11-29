@@ -33,7 +33,7 @@ void ChatNetworkManager::sendApplication(const QString& receiver)
 {
 	QByteArray  out;
 	QDataStream stream(&out, QIODevice::WriteOnly);
-	int type = MSGTYPE::CronyApplication;
+	int type = MSGTYPE::FriendApplication;
 	stream << type << QString::number(GLOB_UserAccount) << receiver;
 	this->socket->write(out);
 	if (!this->socket->waitForBytesWritten())
@@ -61,14 +61,23 @@ void ChatNetworkManager::ReadData()
 		stream >> account;
 		emit this->UserLogined(account);
 	}
-	else if (type == MSGTYPE::CronyApplication) {
+	else if (type == MSGTYPE::WaitAcceptApplication) {
 		QString sender;
 		stream >> sender;
 		emit this->acceptUserApplication(sender);
 	}
-	else if (type == MSGTYPE::updateCronyList) {
-		QString senderAccount;
-		stream >> senderAccount;
-		emit this->updateUserFriendList(senderAccount);
+	else if (type == MSGTYPE::AcceptedApplication) {
+		QString receiverAccount;
+		stream >> receiverAccount;
+		emit this->updateUserFriendList(receiverAccount);
 	}
+}
+
+void ChatNetworkManager::acceptApplication(const QString& userAccount)
+{
+	QByteArray out;
+	QDataStream stream(&out, QIODevice::WriteOnly);
+	int type = MSGTYPE::SendAcceptApplicationNotice;
+	stream << type << userAccount;
+	this->socket->write(out);
 }
