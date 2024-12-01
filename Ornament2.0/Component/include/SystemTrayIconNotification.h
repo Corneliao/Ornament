@@ -17,7 +17,6 @@ public:
 			if (trayicon_instence) {
 				trayicon_instence->deleteLater();
 				trayicon_instence = Q_NULLPTR;
-				qDebug() << "释放trayIcon";
 			}
 		}
 	};

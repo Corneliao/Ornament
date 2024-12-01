@@ -6,7 +6,7 @@ ApplicationTitleBar::ApplicationTitleBar(QWidget* parent)
 	this->dpi = this->devicePixelRatioF();
 
 	QHBoxLayout* main_lay = new QHBoxLayout(this);
-	main_lay->setContentsMargins(25, 11, 25, 11);
+	main_lay->setContentsMargins(15, 11, 15, 5);
 	this->setLayout(main_lay);
 
 	this->window_ico = new QLabel(this);

@@ -14,14 +14,19 @@
         <file>Resource/ico/TwemojiRedCircle.png</file>
         <file>Resource/ico/RiNotification3Line.png</file>
         <file>Resource/ico/RiSearchLine.png</file>
-        <file>Resource/ico/invite.png</file>
         <file>Resource/ico/RiMessage3Fill.png</file>
         <file>Resource/ico/RiMessage3Line.png</file>
-        <file>Resource/ico/friendIco.png</file>
-        <file>Resource/ico/friendIco_fill.png</file>
         <file>Resource/ico/TablerBrandUnity_empty.png</file>
         <file>Resource/ico/IconamoonSearch.png</file>
         <file>Resource/ico/correct.png</file>
         <file>Resource/ico/fail.png</file>
+        <file>Resource/ico/message_selected.png</file>
+        <file>Resource/ico/message_unselected.png</file>
+        <file>Resource/ico/friend_selected.png</file>
+        <file>Resource/ico/friend_unselected.png</file>
+        <file>Resource/ico/friend_select_white.png</file>
+        <file>Resource/ico/message_select_white.png</file>
+        <file>Resource/ico/friend_edit_sel.png</file>
+        <file>Resource/ico/friend_edit_unsel.png</file>
     </qresource>
 </RCC>

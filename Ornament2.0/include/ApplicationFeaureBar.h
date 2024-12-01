@@ -27,7 +27,6 @@ private:
 
 private:
 	QVBoxLayout* main_vbox = Q_NULLPTR;
-	AddFriendButton* addfriend_button = Q_NULLPTR;
 	QListWidget* feature_listWidget = Q_NULLPTR;
 	int itemIndex = 0;
 	AddFriend* addFriend = Q_NULLPTR;
@@ -35,15 +34,6 @@ signals:
 	void indexChanged(const int index);
 };
 
-class AddFriendButton :public QWidget {
-public:
-	AddFriendButton(QWidget* parent = Q_NULLPTR);
-protected:
-	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
-private:
-	QLabel* ico = Q_NULLPTR;
-	QLabel* ico_text = Q_NULLPTR;
-};
 class  FeatureButton :public QWidget {
 	Q_OBJECT
 public:
@@ -51,6 +41,8 @@ public:
 	int GetCurrentIndex()const;
 	void setUnSelected();
 	void setSelected();
+	void enterEvent(QEnterEvent*)Q_DECL_OVERRIDE;
+	void leaveEvent(QEvent* e)Q_DECL_OVERRIDE;
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 	void mousePressEvent(QMouseEvent*)Q_DECL_OVERRIDE;
@@ -60,6 +52,7 @@ private:
 	QPixmap normalPixmap;
 	bool isPressed = false;
 	int currentIndex = 0;
+	bool isHover = false;
 signals:
 	void clicked(const int index);
 };

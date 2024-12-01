@@ -44,10 +44,6 @@ SystemNotification::SystemNotification(QWidget* parent)
 	this->shadow->setColor(Qt::gray);
 	this->setGraphicsEffect(this->shadow);
 
-	//UserData data;
-	//data.userHead = RoundImage::RoundImageFromStringPath("D:\\Doga\\WallPaper\\b_7ee3bc45e31b578427bd985ae04f0ab9.png");
-	//data.userName = "Doga酱";
-	//this->IncreaseUserApplicationItem(data);
 }
 
 SystemNotification::~SystemNotification()

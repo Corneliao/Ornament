@@ -9,6 +9,7 @@ extern bool GLOB_IsConnectedServer;
 extern int GLOB_UserAccount;
 extern QString GLOB_UserName;
 extern QSize screenSize;
+extern QByteArray GLOB_UserHeadImagebytes;
 //extern QPixmap GLOB_UserHead;
 
 enum  NoticeType { UserApplication };
@@ -29,6 +30,7 @@ struct UserData {
 	QString status_text;
 	QString userMessage;
 	int index = 0;
+	Qt::Alignment alignment = Qt::AlignLeft;
 };
 
 //struct FriendChatData {

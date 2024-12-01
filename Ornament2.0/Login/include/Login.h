@@ -25,14 +25,15 @@ public:
 	Login(QWidget* parent = Q_NULLPTR);
 	~Login();
 protected:
-	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
+	void paintEvent(QPaintEvent*event)Q_DECL_OVERRIDE;
 	void getUserHeadBytes(const QPixmap& userhead);
 	QPixmap setPixmapDpi(const QSize& size, const QPixmap& pixmap);
 	bool eventFilter(QObject* target, QEvent* event)Q_DECL_OVERRIDE;
 	void deleteRegisterWindow();
-	void closeEvent(QCloseEvent*)Q_DECL_OVERRIDE;
+	void closeEvent(QCloseEvent*event)Q_DECL_OVERRIDE;
 	void deleteSqlThread();
 	void VerifyFailed();
+
 private:
 	NormalTitleBar* login_title_Bar = Q_NULLPTR;
 	QLabel* userHead = Q_NULLPTR;
@@ -48,6 +49,7 @@ private:
 	bool isLogining = false;
 	Notification* login_notification = Q_NULLPTR;
 	QPropertyAnimation* login_notification_animation = Q_NULLPTR;
+
 signals:
 	void startloginAccountSignal(const QString& userAccount, const QString& password);
 	//	void VerifySucceed(const QByteArray& imagebytes, const QString& userName, const  int& userAccount);

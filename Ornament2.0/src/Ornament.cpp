@@ -8,10 +8,12 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	qRegisterMetaType<QList<UserData>>("QList<UserData>");
 	GLOB_UserAccount = userAccount;
 	GLOB_UserName = userName;
+	GLOB_UserHeadImagebytes = imagebytes;
 
 	this->setMinimumSize(1050, 750);
+
 	QVBoxLayout* main_vbox = new QVBoxLayout(this);
-	main_vbox->setContentsMargins(0, 0, 0, 0);
+	main_vbox->setContentsMargins(15, 0, 15, 0);
 	this->setLayout(main_vbox);
 	this->setAttribute(Qt::WA_DeleteOnClose);
 
@@ -30,8 +32,8 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	this->friend_page = new FriendPage(this);
 	this->stack_layout->addWidget(this->friend_page);
 
-	lay->addLayout(this->stack_layout);
 	lay->addWidget(this->application_feature_Bar);
+	lay->addLayout(this->stack_layout);
 
 	main_vbox->addWidget(this->application_title_Bar);
 	main_vbox->addLayout(lay);
@@ -64,14 +66,20 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	connect(this->application_feature_Bar, &ApplicationFeaureBar::indexChanged, this->stack_layout, &QStackedLayout::setCurrentIndex, Qt::DirectConnection);
 	connect(this->application_title_Bar, &ApplicationTitleBar::showAddFriendSignal, this, &Ornament::showAddFriend, Qt::DirectConnection);
 	connect(this->application_title_Bar, &ApplicationTitleBar::showSystemNotification, this, &Ornament::showSystemNotification, Qt::DirectConnection);
-	connect(this->friend_page, &FriendPage::createChatWindowSignal, this->chat_page, &ChatPage::CreateChatWindow, Qt::DirectConnection);
-	connect(this->friend_page, &FriendPage::createChatWindowSignal, this, [=](const QListWidgetItem* item) {
-		Q_UNUSED(item);
+	connect(this->friend_page, &FriendPage::createChatWindowSignal, this->chat_page, &ChatPage::DoubleClickCreateChatWindow, Qt::DirectConnection);
+	connect(this->friend_page, &FriendPage::createChatWindowSignal, this, [=](UserData& user_data) {
+		Q_UNUSED(user_data);
 		this->stack_layout->setCurrentIndex(0);
 		this->application_feature_Bar->setCurrentFeatureButton(0);
 		});
+	connect(this->systemNotification, &SystemNotification::NotificationEmptySignal, this, [=]() {
+		this->application_title_Bar->setNotificationUnread(false);
+		});
 
-	qDebug() << "主线程" << QThread::currentThreadId();
+	connect(this->friend_page, &FriendPage::itemChanged, this->chat_page, &ChatPage::itemChanged, Qt::DirectConnection);
+
+	SystemTrayIconNotification::getInstence();
+
 	//连接服务器
 	this->chat_thread = new  QThread;
 	this->chat_network_manager = new ChatNetworkManager;
@@ -81,6 +89,8 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	connect(this->chat_network_manager, &ChatNetworkManager::connectedSignal, this, &Ornament::startSqlThread, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::connecterrorSignal, this, &Ornament::deleteChatThread, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::UserLogined, this->friend_page, &FriendPage::updateFriendCurrentStatus, Qt::QueuedConnection);
+	connect(this->chat_page, &ChatPage::SendUserMessage, this->chat_network_manager, &ChatNetworkManager::sendUserNormalMessage, Qt::QueuedConnection);
+	connect(this->chat_network_manager, &ChatNetworkManager::acceptUserNormalMessage, this, &Ornament::dealAcceptUserNormalMessage, Qt::QueuedConnection);
 }
 
 Ornament::~Ornament()
@@ -153,26 +163,10 @@ bool Ornament::eventFilter(QObject* target, QEvent* event)
 	return false;
 }
 
-void Ornament::showEvent(QShowEvent*)
-{
-	/*HWND hCurWnd = GetForegroundWindow();
-	DWORD dwMyID = GetCurrentThreadId();
-	DWORD dwCurID = GetWindowThreadProcessId(hCurWnd, NULL);
-	AttachThreadInput(dwCurID, dwMyID, TRUE);
-	SetForegroundWindow((HWND)winId());
-	AttachThreadInput(dwCurID, dwMyID, FALSE);
-	SwitchToThisWindow((HWND)winId(), TRUE);
-	SetActiveWindow((HWND)winId());
-	this->setFocus();*/
-	//	qDebug() << "显示";
-	//	this->setWindowState(Qt::WindowActive);
-	//	this->activateWindow();
-	//
-}
-
 void Ornament::showTool()
 {
 	this->tool->isHidden() ? this->tool->show() : this->tool->hide();
+	this->tool->raise();
 	if (this->tool->isHidden())
 		emit this->ToolStateSignal(false);
 	else
@@ -216,8 +210,13 @@ void Ornament::dealUserApplication(const UserData& user_data)
 	this->systemNotification->IncreaseUserApplicationItem(user_data);
 }
 
-void Ornament::changeEvent(QEvent* event)
+void Ornament::dealAcceptUserNormalMessage(const QString& senderUserAccount, const QString& message)
 {
+	UserData user_data = this->friend_page->getUserData(senderUserAccount);
+	user_data.userMessage = message;
+	user_data.alignment = Qt::AlignLeft;
+	//	this->chat_page->IncreaseUserNormalMessageItem(user_data);
+	this->chat_page->CreateChatWindow(user_data);
 }
 
 void Ornament::mousePressEvent(QMouseEvent* event)
@@ -229,4 +228,6 @@ void Ornament::mousePressEvent(QMouseEvent* event)
 		//this->systemNotification_Animation->stop();
 		this->systemNotification_Animation->start();
 	}
+
+	QWidget::mousePressEvent(event);
 }

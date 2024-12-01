@@ -6,8 +6,18 @@
 #include <QLabel>
 #include <QPainter>
 #include <QGraphicsDropShadowEffect>
+#include <QListWidget>
+#include <QLineEdit>
+#include <QEvent>
+#include <QKeyEvent>
+#include <QTextEdit>
 #include "../../global.h"
+#include "../../StyledItemDelegate/include/MessageDelegate.h"
+#include "../../Component/include/RoundImage.h"
+#include "../../Component/include/smoothlistwidget.h"
 class ChatTitle;
+class ChatMessageEdit;
+class SendMessageButton;
 class ChatWindow : public QWidget
 {
 	Q_OBJECT
@@ -16,10 +26,18 @@ public:
 	explicit ChatWindow(const UserData& user_data, QWidget* parent);
 	~ChatWindow();
 	UserData currentUserData()const;
+	void IncreaseMessageItem(const UserData& user_data);
+	void IncreaseMyMessageItem(const QString& message);
+	void dealUserSendMessage(const QString& message);
+	void setChatWindowData(const UserData & user_data);
 private:
 	UserData m_userData;
 	ChatTitle* chat_title = Q_NULLPTR;
 	int currentChatWindowIndex = 0;
+	QListWidget* chat_list = Q_NULLPTR;
+	ChatMessageEdit* message_edit = Q_NULLPTR;
+signals:
+	void SendUserMessage(const QString& senderUserAccount, const QString& receiverUserAccount, const QString& message);
 };
 
 class ChatTitle :public QWidget {
@@ -32,4 +50,26 @@ private:
 	QLabel* userHead = Q_NULLPTR;
 	QLabel* userName = Q_NULLPTR;
 	QGraphicsDropShadowEffect* shadow = Q_NULLPTR;
+};
+
+class ChatMessageEdit :public QWidget {
+	Q_OBJECT
+public:
+	explicit ChatMessageEdit(QWidget* parent = Q_NULLPTR);
+protected:
+	void paintEvent(QPaintEvent* event)Q_DECL_OVERRIDE;
+	bool eventFilter(QObject* target, QEvent* event) Q_DECL_OVERRIDE;
+private:
+	QTextEdit* message_edit = Q_NULLPTR;
+	SendMessageButton* send_button = Q_NULLPTR;
+signals:
+	void SendUserMessage(const QString& message);
+	void MyMessageSignal(const QString& message);
+};
+
+class SendMessageButton :public QWidget {
+public:
+	SendMessageButton(QWidget* parent = Q_NULLPTR);
+protected:
+	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 };

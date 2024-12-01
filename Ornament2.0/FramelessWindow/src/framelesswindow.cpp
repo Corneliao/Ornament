@@ -110,7 +110,6 @@ bool FramelessWindow::nativeEvent(const QByteArray& eventType, void* message, qi
 			*result = HTCAPTION;
 			return true;
 		}
-
 		return false;
 	}
 	case WM_GETMINMAXINFO: {

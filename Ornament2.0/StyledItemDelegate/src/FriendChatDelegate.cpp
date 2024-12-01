@@ -35,6 +35,14 @@ void FriendChatDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 
 	temp.setText(user_data.userMessage);
 	temp.adjustSize();
+
+	QString message;
+	if (temp.width() > 100)
+		message = temp.text().left(8) + "...";
+
+	else
+		message = temp.text();
+
 	QRect userMessageRect = QRect(userNameRect.left(), userNameRect.bottom() + 5, temp.width(), temp.height());
 
 	painter->save();
@@ -65,7 +73,7 @@ void FriendChatDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 	painter->save();
 	painter->setPen(Qt::gray);
 	painter->setBrush(Qt::NoBrush);
-	painter->drawText(userMessageRect, Qt::AlignLeft, user_data.userMessage);
+	painter->drawText(userMessageRect, Qt::AlignLeft, message);
 	painter->restore();
 }
 

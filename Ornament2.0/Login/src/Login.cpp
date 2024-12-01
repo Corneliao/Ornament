@@ -87,7 +87,7 @@ Login::~Login()
 {
 }
 
-void Login::paintEvent(QPaintEvent*)
+void Login::paintEvent(QPaintEvent*event)
 {
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
@@ -97,6 +97,7 @@ void Login::paintEvent(QPaintEvent*)
 	gradient.setColorAt(0.5, Qt::white);
 	painter.setBrush(gradient);
 	painter.drawRect(this->rect());
+	QWidget::paintEvent(event);
 }
 
 void Login::getUserHeadBytes(const QPixmap& userhead)
@@ -153,11 +154,12 @@ void Login::deleteRegisterWindow()
 	this->registerUserAccount = Q_NULLPTR;
 }
 
-void Login::closeEvent(QCloseEvent*)
+void Login::closeEvent(QCloseEvent*event)
 {
 	if (this->registerUserAccount)
 		this->deleteRegisterWindow();
 	this->deleteSqlThread();
+	QWidget::closeEvent(event);
 }
 
 void Login::deleteSqlThread()
@@ -187,3 +189,5 @@ void Login::VerifyFailed()
 		this->login_notification_animation->start();
 		});
 }
+
+

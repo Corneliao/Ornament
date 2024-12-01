@@ -3,6 +3,8 @@
 NormalTitleBar::NormalTitleBar(const QString& text, QWidget* parent)
 	: QWidget(parent)
 {
+
+
 	QHBoxLayout* main_lay = new QHBoxLayout(this);
 	main_lay->setContentsMargins(0, 9, 9, 9);
 	this->setLayout(main_lay);
@@ -52,3 +54,4 @@ bool NormalTitleBar::eventFilter(QObject* target, QEvent* event)
 	}
 	return QWidget::eventFilter(target, event);
 }
+

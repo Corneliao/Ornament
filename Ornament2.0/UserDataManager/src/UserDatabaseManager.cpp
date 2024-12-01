@@ -141,7 +141,6 @@ void  UserDatabaseManager::selectUserDataForSearch(const QString& userAccount)
 	emit SearchFriendDataSignal(data);
 }
 
-
 /**
  * @brief 判断是否已存在好友申请
  * @param receiver
@@ -346,10 +345,10 @@ void UserDatabaseManager::addUserFriend(const QString& userAccount)
 	query.bindValue(":user", userAccount);
 	query.bindValue(":crony", GLOB_UserAccount);
 	if (ret && query.exec()) {
-		qDebug() << "添加好友成功";
+		qDebug() << __FUNCTION__ << __TIME__ << "添加好友成功";
 		query.prepare("DELETE FROM CronyApplicationTemp WHERE senderAccount = " + userAccount + " AND receiverAccount = " + QString::number(GLOB_UserAccount));
 		if (query.exec()) {
-			qDebug() << "删除申请记录";
+			qDebug() << __FUNCTION__ << __TIME__ << "删除申请记录";
 		}
 		emit AcceptedApplicationSignal(userAccount);
 	}
@@ -360,7 +359,6 @@ void UserDatabaseManager::addUserFriend(const QString& userAccount)
  */
 void UserDatabaseManager::iniSql()
 {
-	qDebug() << "数据库子线程" << QThread::currentThreadId();
 	QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL", this->connectName);
 	db.setUserName("root");
 	db.setPassword("y..750242");
@@ -368,7 +366,6 @@ void UserDatabaseManager::iniSql()
 	db.setDatabaseName("users");
 	db.setHostName("120.46.157.203");
 	if (db.open()) {
-		qInfo() << __FUNCTION__ << __TIME__ << "打开数据库成功";
 		GLOB_IsConnectedMysql = true;
 	}
 

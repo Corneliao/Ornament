@@ -31,8 +31,6 @@ public:
 protected:
 	void resizeEvent(QResizeEvent* event)Q_DECL_OVERRIDE;
 	bool eventFilter(QObject* target, QEvent* event)Q_DECL_OVERRIDE;
-	void showEvent(QShowEvent*)Q_DECL_OVERRIDE;
-	void changeEvent(QEvent* event)Q_DECL_OVERRIDE;
 	void mousePressEvent(QMouseEvent* event)Q_DECL_OVERRIDE;
 private:
 	void showTool();
@@ -41,6 +39,7 @@ private:
 	void SystemNotificationAnimationFrameChanged(int frame);
 	void maxWindowSlot();
 	void dealUserApplication(const UserData& user_data);
+	void dealAcceptUserNormalMessage(const QString& senderUserAccount, const QString& message);
 private:
 	ApplicationTitleBar* application_title_Bar = Q_NULLPTR;
 	ApplicationFeaureBar* application_feature_Bar = Q_NULLPTR;
@@ -56,6 +55,7 @@ private:
 	AddFriend* addFriend = Q_NULLPTR;
 	SystemNotification* systemNotification = Q_NULLPTR;
 	QTimeLine* systemNotification_Animation = Q_NULLPTR;
+
 signals:
 	void ToolStateSignal(bool isShow);
 	void searchFriendSignal(const QString& userAccount);

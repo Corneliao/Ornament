@@ -21,10 +21,15 @@ public:
 	void initializeFriends(const QList<UserData> datas);
 	void increaseUserFriendItem(const UserData& friend_data);
 	void updateFriendCurrentStatus(const QString& cronyAccount);
+	UserData getUserData(const QString& userAccount)const;
+	void dealItemClicked(QListWidgetItem* item);
+	void dealItemChanged(QListWidgetItem* item);
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 private:
 	QListWidget* friend_list = Q_NULLPTR;
+	QLabel* title = Q_NULLPTR;
 signals:
-	void createChatWindowSignal(const QListWidgetItem* item);
+	void createChatWindowSignal(UserData& user_data);
+	void ItemChanged(const UserData& user_data);
 };

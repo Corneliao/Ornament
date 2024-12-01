@@ -7,6 +7,7 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QEvent>
+#include <windows.h>
 class Tool;
 class TitleTool : public QWidget
 {

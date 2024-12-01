@@ -20,25 +20,79 @@ ChatPage::~ChatPage()
 {
 }
 
-void ChatPage::CreateChatWindow(const QListWidgetItem* item)
+void ChatPage::CreateChatWindow(UserData& user_data)
 {
 	//判断是否已存在此聊天窗口
-	UserData user_data = item->data(Qt::UserRole).value<UserData>();
-	bool isExist = this->friendChat_list->isExistFriendChatItem(user_data.userAccount);
-	if (isExist)
+	int isExist = this->friendChat_list->isExistFriendChatItem(user_data.userAccount);
+	if (isExist != -1) {
+		this->friendChat_list->setItemData(isExist, user_data);
+		ChatWindow* chat_window;
+		for (int i = 1; i < this->stack_layout->count(); i++) {
+			chat_window = qobject_cast<ChatWindow*>(this->stack_layout->widget(i));
+			if (chat_window) {
+				if (chat_window->currentUserData().userAccount == user_data.userAccount) {
+					chat_window->IncreaseMessageItem(user_data);
+					return;
+				}
+			}
+		}
+	}
+	user_data.index = this->stack_layout->count();
+	ChatWindow* chat_window = new ChatWindow(user_data, this);
+	QListWidgetItem* item = new QListWidgetItem();
+	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
+	this->ChatItemAndChatWindow.insert(item, chat_window);
+	this->friendChat_list->increaseFriendItem(item);
+	this->stack_layout->addWidget(chat_window);
+	for (int i = 1; i < this->stack_layout->count(); i++) {
+		chat_window = qobject_cast<ChatWindow*>(this->stack_layout->widget(i));
+		if (chat_window) {
+			if (chat_window->currentUserData().userAccount == user_data.userAccount) {
+				chat_window->IncreaseMessageItem(user_data);
+				break;
+			}
+		}
+	}
+	connect(chat_window, &ChatWindow::SendUserMessage, this, &ChatPage::SendUserMessage, Qt::DirectConnection);
+}
+
+void ChatPage::DoubleClickCreateChatWindow(UserData& user_data)
+{
+	int isExist = this->friendChat_list->isExistFriendChatItem(user_data.userAccount);
+	if (isExist != -1)
 		return;
 	user_data.index = this->stack_layout->count();
 	ChatWindow* chat_window = new ChatWindow(user_data, this);
+	QListWidgetItem* item = new QListWidgetItem();
+	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
+	this->ChatItemAndChatWindow.insert(item, chat_window);
 	this->stack_layout->addWidget(chat_window);
-	//this->stack_layout->setCurrentWidget(chat_window);
-	this->friendChat_list->increaseFriendItem(user_data);
+	this->stack_layout->setCurrentWidget(chat_window);
+	this->friendChat_list->increaseFriendItem(item);
 	this->friendChat_list->setItemSelected(user_data.userAccount);
+	connect(chat_window, &ChatWindow::SendUserMessage, this, &ChatPage::SendUserMessage, Qt::DirectConnection);
 }
 
-void ChatPage::setCurrentChatWindow(const QListWidgetItem* item)
+void ChatPage::setCurrentChatWindow(const UserData& user_data)
 {
-	UserData user_data = item->data(Qt::UserRole).value<UserData>();
 	this->stack_layout->setCurrentIndex(user_data.index);
+}
+
+/**
+ * @brief 当好友上线时 更新item和聊天窗口的数据
+ * @param user_data
+ */
+void ChatPage::itemChanged(const UserData& user_data)
+{
+	UserData temp;
+	for (QListWidgetItem* item : this->ChatItemAndChatWindow.keys()) {
+		temp = item->data(Qt::UserRole).value<UserData>();
+		if (temp.userAccount == user_data.userAccount) {
+			item->setData(Qt::UserRole, QVariant::fromValue(user_data));
+			this->ChatItemAndChatWindow.value(item)->setChatWindowData(user_data);
+			return;
+		}
+	}
 }
 
 void ChatPage::paintEvent(QPaintEvent*)

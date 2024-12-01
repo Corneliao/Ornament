@@ -3,6 +3,8 @@
 AddFriend::AddFriend(QDialog* parent)
 	: FranelessWindowForDialog(parent)
 {
+	this->setWindowIcon(QIcon(":/Resource/ico/TablerBrandUnity.png"));
+	this->setWindowTitle("添加好友");
 	this->setFocusPolicy(Qt::ClickFocus);
 	QVBoxLayout* main_vbox = new QVBoxLayout(this);
 	this->setLayout(main_vbox);
@@ -111,7 +113,7 @@ void AddFriend::paintEvent(QPaintEvent*)
 void AddFriend::showEvent(QShowEvent*)
 {
 	this->setFixedSize(400, 60);
-	this->move((screenSize.width()-this->width())/2, (screenSize.height() - this->height()) / 2);
+	this->move((screenSize.width() - this->width()) / 2, (screenSize.height() - this->height()) / 2);
 }
 
 void AddFriend::searchFriend(const QString& userAccount)

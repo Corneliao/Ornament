@@ -6,3 +6,4 @@
 #define Q_OBJECT
 #define Q_NULLPTR
 #define emit
+#define signals

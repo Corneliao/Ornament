@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QEvent>
 #include <QPainter>
+#include <QMouseEvent>
 #include "../../global.h"
 class NormalTitleBar : public QWidget
 {
@@ -16,9 +17,11 @@ public:
 	void setCloseVisible(bool visible);
 protected:
 	bool eventFilter(QObject* target, QEvent* event)Q_DECL_OVERRIDE;
+
 private:
 	QLabel* close_window = Q_NULLPTR;
 	QLabel* title = Q_NULLPTR;
 signals:
 	void closeWindowSignal();
+
 };

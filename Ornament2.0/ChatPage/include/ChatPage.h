@@ -15,13 +15,17 @@ public:
 	ChatPage(QWidget* parent);
 	~ChatPage();
 public:
-	void CreateChatWindow(const QListWidgetItem* item);
-	void setCurrentChatWindow(const QListWidgetItem* item);
+	void CreateChatWindow(UserData& user_data);
+	void DoubleClickCreateChatWindow(UserData& user_data);
+	void setCurrentChatWindow(const UserData& user_data);
+	void itemChanged(const UserData& user_data);
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 private:
 	FriendChatList* friendChat_list = Q_NULLPTR;
 	DefaultWindow* default_window = Q_NULLPTR;
 	QStackedLayout* stack_layout = Q_NULLPTR;
+	QMap<QListWidgetItem*, ChatWindow*>  ChatItemAndChatWindow;
 signals:
+	void SendUserMessage(const QString& senderUserAccount, const QString& receiverUserAccount, const QString& message);
 };

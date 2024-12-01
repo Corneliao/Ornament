@@ -71,6 +71,12 @@ void ChatNetworkManager::ReadData()
 		stream >> receiverAccount;
 		emit this->updateUserFriendList(receiverAccount, USERDATATYPE::UpdateUserFriend);
 	}
+	else if (type == MSGTYPE::SendNormalMessage) {
+		QString senderUserAccount;
+		QString message;
+		stream >> senderUserAccount >> message;
+		emit this->acceptUserNormalMessage(senderUserAccount, message);
+	}
 }
 
 void ChatNetworkManager::acceptApplication(const QString& userAccount)
@@ -79,5 +85,14 @@ void ChatNetworkManager::acceptApplication(const QString& userAccount)
 	QDataStream stream(&out, QIODevice::WriteOnly);
 	int type = MSGTYPE::SendAcceptApplicationNotice;
 	stream << type << userAccount;
+	this->socket->write(out);
+}
+
+void ChatNetworkManager::sendUserNormalMessage(const QString& senderUserAccount, const QString& receiverUserAccount, const QString& message)
+{
+	QByteArray out;
+	QDataStream stream(&out, QIODevice::WriteOnly);
+	int type = MSGTYPE::NormalMessage;
+	stream << type << senderUserAccount << receiverUserAccount << message;
 	this->socket->write(out);
 }
