@@ -24,6 +24,7 @@ public:
 	UserData getUserData(const QString& userAccount)const;
 	void dealItemClicked(QListWidgetItem* item);
 	void dealItemChanged(QListWidgetItem* item);
+	void setUserDataForDisconnected(const  QString &  userAccount);
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 private:
@@ -31,5 +32,5 @@ private:
 	QLabel* title = Q_NULLPTR;
 signals:
 	void createChatWindowSignal(UserData& user_data);
-	void ItemChanged(const UserData& user_data);
+	void ItemChanged(UserData& user_data);
 };

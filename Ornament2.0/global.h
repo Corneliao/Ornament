@@ -2,7 +2,7 @@
 
 #include <QPixmap>
 #include <QString>
-
+#include  <QListWidgetItem>
 extern qreal GLOB_ScaleDpi;
 extern bool GLOB_IsConnectedMysql;
 extern bool GLOB_IsConnectedServer;
@@ -10,15 +10,31 @@ extern int GLOB_UserAccount;
 extern QString GLOB_UserName;
 extern QSize screenSize;
 extern QByteArray GLOB_UserHeadImagebytes;
+//extern QMap<QString, QListWidgetItem*> FileItemQueue;
+extern QString SenderFileUserAccountTemp;
+extern QString ReceiverFileUserAccountTemp;
 //extern QPixmap GLOB_UserHead;
 
 enum  NoticeType { UserApplication };
 enum USERDATATYPE { UserApplicationData = 0, UpdateUserFriend };
 
+enum ChatMessageType { TEXT, USERFILE };
+enum FILETYPE { EXE, MUSIC };
 struct FeatureBarData {
 	QPixmap normal_ico;
 	QPixmap select_ico;
 	QString ico_text;
+};
+
+struct FileInfoData {
+	QPixmap fileIco;
+	QString fileName;
+	QString fileSize;
+	qreal position = 0.0;
+	QString filePath;
+	bool isDownloading = false;
+	bool isUploading = false;
+	int FileType = FILETYPE::EXE;
 };
 
 struct UserData {
@@ -31,6 +47,8 @@ struct UserData {
 	QString userMessage;
 	int index = 0;
 	Qt::Alignment alignment = Qt::AlignLeft;
+	int messageType = ChatMessageType::TEXT;
+	FileInfoData fileInfo;
 };
 
 //struct FriendChatData {
@@ -45,6 +63,7 @@ struct SearchFriendData {
 	bool status;
 	QString userAccount;
 };
+
 //struct FriendListData {
 //	QPixmap userHead;
 //	QString userName;

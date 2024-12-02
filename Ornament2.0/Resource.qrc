@@ -28,5 +28,10 @@
         <file>Resource/ico/message_select_white.png</file>
         <file>Resource/ico/friend_edit_sel.png</file>
         <file>Resource/ico/friend_edit_unsel.png</file>
+        <file>Resource/ico/emoji_sel.png</file>
+        <file>Resource/ico/emoji_unsel.png</file>
+        <file>Resource/ico/file_sel.png</file>
+        <file>Resource/ico/file_unsel.png</file>
+        <file>Resource/ico/exe.png</file>
     </qresource>
 </RCC>

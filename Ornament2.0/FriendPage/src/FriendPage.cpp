@@ -35,3 +35,8 @@ UserData FriendPage::getUserData(const QString& userAccount) const
 	UserData data = this->friend_list->getUserData(userAccount);
 	return data;
 }
+
+void FriendPage::setUserDataForDisconnected(const QString& userAccount)
+{
+	this->friend_list->setUserDataForDisconnected(userAccount);
+}

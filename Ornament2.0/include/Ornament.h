@@ -40,6 +40,9 @@ private:
 	void maxWindowSlot();
 	void dealUserApplication(const UserData& user_data);
 	void dealAcceptUserNormalMessage(const QString& senderUserAccount, const QString& message);
+	void dealUserDisconnected(const QString& userAccount);
+	void dealReceiveFileForServer(const QString senderAccount, const QString fileName, const qint64 fileSize);
+	void updateUploadingFileProgress(const qreal& pos);
 private:
 	ApplicationTitleBar* application_title_Bar = Q_NULLPTR;
 	ApplicationFeaureBar* application_feature_Bar = Q_NULLPTR;

@@ -7,3 +7,5 @@ QString GLOB_UserName = "";
 qreal GLOB_ScaleDpi = 0.0;
 QSize screenSize = QSize();
 QByteArray GLOB_UserHeadImagebytes = QByteArray();
+QString SenderFileUserAccountTemp = "";
+QString ReceiverFileUserAccountTemp = "";

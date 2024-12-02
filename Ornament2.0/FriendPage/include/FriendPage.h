@@ -15,11 +15,12 @@ public:
 	void updateFriendCurrentStatus(const QString& cronyAccount);
 	void IncreaseNewUserItem(const UserData& user_data);
 	UserData getUserData(const QString& userAccount)const;
+	void setUserDataForDisconnected(const QString &  userAccount);
 private:
 	FriendInfo* friend_info = Q_NULLPTR;
 	FriendList* friend_list = Q_NULLPTR;
 signals:
 	void userFriendList(const QList<UserData> datas);
-	void createChatWindowSignal( UserData  & user_data);
-	void itemChanged(const UserData& user_data);
+	void createChatWindowSignal(UserData & user_data);
+	void itemChanged(UserData& user_data);
 };

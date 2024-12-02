@@ -91,6 +91,10 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	connect(this->chat_network_manager, &ChatNetworkManager::UserLogined, this->friend_page, &FriendPage::updateFriendCurrentStatus, Qt::QueuedConnection);
 	connect(this->chat_page, &ChatPage::SendUserMessage, this->chat_network_manager, &ChatNetworkManager::sendUserNormalMessage, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::acceptUserNormalMessage, this, &Ornament::dealAcceptUserNormalMessage, Qt::QueuedConnection);
+	connect(this->chat_network_manager, &ChatNetworkManager::userDisconnectedSignal, this, &Ornament::dealUserDisconnected, Qt::QueuedConnection);
+	connect(this->chat_page, &ChatPage::SendUserMessageForUserFile, this->chat_network_manager, &ChatNetworkManager::SendUserFile, Qt::QueuedConnection);
+	connect(this->chat_network_manager, &ChatNetworkManager::ReceiveFileForServertSignal, this, &Ornament::dealReceiveFileForServer, Qt::QueuedConnection);
+	connect(this->chat_network_manager, &ChatNetworkManager::updateUploadFileProgress, this, &Ornament::updateUploadingFileProgress,Qt::QueuedConnection);
 }
 
 Ornament::~Ornament()
@@ -215,8 +219,36 @@ void Ornament::dealAcceptUserNormalMessage(const QString& senderUserAccount, con
 	UserData user_data = this->friend_page->getUserData(senderUserAccount);
 	user_data.userMessage = message;
 	user_data.alignment = Qt::AlignLeft;
-	//	this->chat_page->IncreaseUserNormalMessageItem(user_data);
+	user_data.messageType = ChatMessageType::TEXT;
 	this->chat_page->CreateChatWindow(user_data);
+}
+
+void Ornament::dealUserDisconnected(const QString& userAccount)
+{
+	this->friend_page->setUserDataForDisconnected(userAccount);
+}
+
+void Ornament::dealReceiveFileForServer(const QString senderAccount, const QString fileName, const qint64 fileSize)
+{
+	QString suffix = fileName.right(3);
+	QPixmap file_ico;
+	if (suffix == "exe") {
+		file_ico.load(":/Resource/ico/exe.png");
+	}
+	UserData user_data = this->friend_page->getUserData(senderAccount);
+	user_data.fileInfo.fileName = fileName;
+	user_data.fileInfo.fileSize = QString::number(fileSize);
+	user_data.alignment = Qt::AlignLeft;
+	user_data.messageType = ChatMessageType::USERFILE;
+	user_data.fileInfo.isDownloading = true;
+	user_data.fileInfo.fileIco = file_ico;
+	this->chat_page->CreateChatWindow(user_data);
+
+}
+
+void Ornament::updateUploadingFileProgress(const qreal& pos)
+{
+	this->chat_page->setUploadFileItemProgress(pos);
 }
 
 void Ornament::mousePressEvent(QMouseEvent* event)

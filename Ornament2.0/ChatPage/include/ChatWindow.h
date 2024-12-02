@@ -10,7 +10,11 @@
 #include <QLineEdit>
 #include <QEvent>
 #include <QKeyEvent>
+#include <QFileInfo>
+#include <QFileDialog>
 #include <QTextEdit>
+#include <QScrollBar>
+#include <QTimer>
 #include "../../global.h"
 #include "../../StyledItemDelegate/include/MessageDelegate.h"
 #include "../../Component/include/RoundImage.h"
@@ -27,9 +31,10 @@ public:
 	~ChatWindow();
 	UserData currentUserData()const;
 	void IncreaseMessageItem(const UserData& user_data);
-	void IncreaseMyMessageItem(const QString& message);
 	void dealUserSendMessage(const QString& message);
-	void setChatWindowData(const UserData & user_data);
+	void setChatWindowData(const UserData& user_data);
+	void IncreaseMessageItemForEXE(const FileInfoData& file_data);
+	void setUploadFileItemProgress(const qreal & pos);
 private:
 	UserData m_userData;
 	ChatTitle* chat_title = Q_NULLPTR;
@@ -38,6 +43,7 @@ private:
 	ChatMessageEdit* message_edit = Q_NULLPTR;
 signals:
 	void SendUserMessage(const QString& senderUserAccount, const QString& receiverUserAccount, const QString& message);
+	void SendUserMessageForUserFile(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data);
 };
 
 class ChatTitle :public QWidget {
@@ -62,9 +68,12 @@ protected:
 private:
 	QTextEdit* message_edit = Q_NULLPTR;
 	SendMessageButton* send_button = Q_NULLPTR;
+	QLabel* file_button = Q_NULLPTR;
+	QLabel* emoji_button = Q_NULLPTR;
 signals:
 	void SendUserMessage(const QString& message);
 	void MyMessageSignal(const QString& message);
+	void MyMessageForFileSignal(const FileInfoData& file_data);
 };
 
 class SendMessageButton :public QWidget {

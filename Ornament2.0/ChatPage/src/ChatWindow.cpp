@@ -30,7 +30,7 @@ ChatWindow::ChatWindow(const UserData& user_data, QWidget* parent)
 	main_vbox->addWidget(this->message_edit);
 
 	connect(this->message_edit, &ChatMessageEdit::SendUserMessage, this, &ChatWindow::dealUserSendMessage, Qt::DirectConnection);
-	connect(this->message_edit, &ChatMessageEdit::MyMessageSignal, this, &ChatWindow::IncreaseMyMessageItem, Qt::DirectConnection);
+	connect(this->message_edit, &ChatMessageEdit::MyMessageForFileSignal, this, &ChatWindow::IncreaseMessageItemForEXE, Qt::DirectConnection);
 }
 
 ChatWindow::~ChatWindow()
@@ -47,9 +47,10 @@ void ChatWindow::IncreaseMessageItem(const UserData& user_data)
 	QListWidgetItem* item = new QListWidgetItem(this->chat_list);
 	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
 	this->chat_list->addItem(item);
+	this->chat_list->scrollToBottom();
 }
 
-void ChatWindow::IncreaseMyMessageItem(const QString& message)
+void ChatWindow::dealUserSendMessage(const QString& message)
 {
 	UserData user_data;
 	user_data.alignment = Qt::AlignRight;
@@ -58,13 +59,11 @@ void ChatWindow::IncreaseMyMessageItem(const QString& message)
 	QPixmap userHead = RoundImage::RoundImageFromByteArray(GLOB_UserHeadImagebytes);
 	user_data.userHead = userHead;
 	user_data.userMessage = message;
+	user_data.messageType = ChatMessageType::TEXT;
 	user_data.index = this->m_userData.index;
 
 	this->IncreaseMessageItem(user_data);
-}
 
-void ChatWindow::dealUserSendMessage(const QString& message)
-{
 	if (!this->m_userData.status)
 	{
 		qDebug() << "当前好友未在线";
@@ -77,6 +76,49 @@ void ChatWindow::dealUserSendMessage(const QString& message)
 void ChatWindow::setChatWindowData(const UserData& user_data)
 {
 	this->m_userData = user_data;
+}
+
+void ChatWindow::IncreaseMessageItemForEXE(const FileInfoData& file_data)
+{
+	UserData user_data;
+	user_data.alignment = Qt::AlignRight;
+	user_data.userAccount = QString::number(GLOB_UserAccount);
+	user_data.userName = GLOB_UserName;
+	QPixmap userHead = RoundImage::RoundImageFromByteArray(GLOB_UserHeadImagebytes);
+	user_data.userHead = userHead;
+	user_data.fileInfo = file_data;
+	user_data.fileInfo.isUploading = true;
+	user_data.messageType = ChatMessageType::USERFILE;
+	user_data.index = this->m_userData.index;
+
+	this->IncreaseMessageItem(user_data);
+
+	/*if (!this->m_userData.status)
+		return;*/
+	ReceiverFileUserAccountTemp = this->m_userData.userAccount;
+	emit this->SendUserMessageForUserFile(QString::number(GLOB_UserAccount), this->m_userData.userAccount, file_data);
+}
+
+void ChatWindow::setUploadFileItemProgress(const qreal& pos)
+{
+	if (this->m_userData.userAccount != ReceiverFileUserAccountTemp)
+		return;
+	for (int i = 0; i < this->chat_list->count(); i++) {
+		QListWidgetItem* item = this->chat_list->item(i);
+		if (item) {
+			UserData data = item->data(Qt::UserRole).value<UserData>();
+			if (data.fileInfo.isUploading) {
+				data.fileInfo.position = pos;
+				item->setData(Qt::UserRole, QVariant::fromValue(data));
+				if (pos >= 1) {
+					data.fileInfo.position = pos;
+					data.fileInfo.isUploading = false;
+					item->setData(Qt::UserRole, QVariant::fromValue(data));
+					return;
+				}
+			}
+		}
+	}
 }
 
 ChatTitle::ChatTitle(const QString& user_name, const QPixmap& user_head, QWidget* parent) :QWidget(parent)
@@ -127,10 +169,37 @@ ChatMessageEdit::ChatMessageEdit(QWidget* parent) :QWidget(parent)
 	this->message_edit->setPlaceholderText("Enter Something...");
 	this->message_edit->installEventFilter(this);
 
+	QHBoxLayout* lay = new QHBoxLayout;
+
+	this->file_button = new QLabel(this);
+
+	this->file_button->setFixedSize(23, 23);
+	this->file_button->setScaledContents(true);
+	QPixmap pixmap(":/Resource/ico/file_unsel.png");
+	this->file_button->setPixmap(pixmap);
+	this->file_button->setCursor(Qt::PointingHandCursor);
+	this->file_button->setAttribute(Qt::WA_Hover);
+	this->file_button->installEventFilter(this);
+
+	this->emoji_button = new QLabel(this);
+	this->emoji_button->setFixedSize(25, 25);
+	this->emoji_button->setScaledContents(true);
+	pixmap.load(":/Resource/ico/emoji_unsel.png");
+	this->emoji_button->setPixmap(pixmap);
+	this->emoji_button->setCursor(Qt::PointingHandCursor);
+	this->emoji_button->setAttribute(Qt::WA_Hover);
+	this->emoji_button->installEventFilter(this);
+
 	this->send_button = new SendMessageButton(this);
+
+	lay->setSpacing(15);
+	lay->addWidget(this->file_button);
+	lay->addWidget(this->emoji_button);
+	lay->addStretch();
+	lay->addWidget(this->send_button);
 	main_vbox->addSpacing(5);
 	main_vbox->addWidget(this->message_edit);
-	main_vbox->addWidget(this->send_button, 0, Qt::AlignRight);
+	main_vbox->addLayout(lay);
 }
 
 void ChatMessageEdit::paintEvent(QPaintEvent* event)
@@ -145,15 +214,58 @@ void ChatMessageEdit::paintEvent(QPaintEvent* event)
 
 bool ChatMessageEdit::eventFilter(QObject* target, QEvent* event)
 {
+	QPixmap pixmap;
 	if (target == this->message_edit) {
 		if (event->type() == QEvent::KeyPress) {
 			QKeyEvent* key = reinterpret_cast<QKeyEvent*>(event);
 			if (key->key() == Qt::Key_Return) {
 				emit this->SendUserMessage(this->message_edit->toPlainText());
-				emit this->MyMessageSignal(this->message_edit->toPlainText());
 				this->message_edit->clear();
 				return true;
 			}
+		}
+	}
+	if (target == this->file_button) {
+		if (event->type() == QEvent::HoverEnter) {
+			pixmap.load(":/Resource/ico/file_sel.png");
+			this->file_button->setPixmap(pixmap);
+			return true;
+		}
+		if (event->type() == QEvent::HoverLeave) {
+			pixmap.load(":/Resource/ico/file_unsel.png");
+			this->file_button->setPixmap(pixmap);
+			return true;
+		}
+		if (event->type() == QEvent::MouseButtonPress) {
+			QString filePath = QFileDialog::getOpenFileName(this, "选择文件", "/");
+			if (!filePath.isEmpty()) {
+				FileInfoData data;
+				data.filePath = filePath;
+				QFileInfo info(filePath);
+				if (info.suffix() == "exe") {
+					pixmap.load(":/Resource/ico/exe.png");
+					data.fileIco = pixmap;
+					data.FileType = FILETYPE::EXE;
+				}
+				QString fileName = info.fileName();
+				data.fileName = fileName;
+				data.fileSize = QString::number(info.size());
+				emit this->MyMessageForFileSignal(data);
+			}
+
+			return true;
+		}
+	}
+	if (target == this->emoji_button) {
+		if (event->type() == QEvent::HoverEnter) {
+			pixmap.load(":/Resource/ico/emoji_sel.png");
+			this->emoji_button->setPixmap(pixmap);
+			return true;
+		}
+		if (event->type() == QEvent::HoverLeave) {
+			pixmap.load(":/Resource/ico/emoji_unsel.png");
+			this->emoji_button->setPixmap(pixmap);
+			return true;
 		}
 	}
 	return QWidget::eventFilter(target, event);

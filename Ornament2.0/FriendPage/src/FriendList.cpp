@@ -94,9 +94,23 @@ void FriendList::dealItemClicked(QListWidgetItem* item)
 void FriendList::dealItemChanged(QListWidgetItem* item)
 {
 	UserData  user_data = item->data(Qt::UserRole).value<UserData>();
-	if (!user_data.status)
-		return;
 	emit this->ItemChanged(user_data);
+}
+
+void FriendList::setUserDataForDisconnected(const QString& userAccount)
+{
+	UserData temp;
+	for (int i = 0; i < this->friend_list->count(); i++) {
+		temp = this->friend_list->item(i)->data(Qt::UserRole).value<UserData>();
+		if (temp.userAccount == userAccount) {
+			temp.status = false;
+			QPixmap pixmap(":/Resource/ico/TwemojiRedCircle.png");
+			temp.status_ico = pixmap;
+			temp.status_text = "离线";
+			this->friend_list->item(i)->setData(Qt::UserRole, QVariant::fromValue(temp));
+			return;
+		}
+	}
 }
 
 void FriendList::paintEvent(QPaintEvent*)

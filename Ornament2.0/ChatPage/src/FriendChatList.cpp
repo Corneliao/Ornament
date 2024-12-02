@@ -51,9 +51,6 @@ FriendChatList::~FriendChatList()
 
 void FriendChatList::increaseFriendItem(QListWidgetItem* item)
 {
-	//判断聊天窗口是否已存在
-	//QListWidgetItem* item = new  QListWidgetItem(this->chat_listWidget);
-	//item->setData(Qt::UserRole, QVariant::fromValue(user_data));
 	this->chat_listWidget->addItem(item);
 }
 
@@ -85,8 +82,14 @@ void FriendChatList::setItemSelected(const QString& account)
 void FriendChatList::setItemData(int index, const UserData& user_data)
 {
 	UserData item_data = this->chat_listWidget->item(index)->data(Qt::UserRole).value<UserData>();
-	item_data.alignment = Qt::AlignLeading;
-	item_data.userMessage = user_data.userMessage;
+	item_data.alignment = Qt::AlignLeft;
+	if (user_data.messageType == ChatMessageType::TEXT) {
+		item_data.userMessage = user_data.userMessage;
+	}
+	else {
+		item_data.userMessage = "[文件]" + user_data.fileInfo.fileName;
+	}
+
 	this->chat_listWidget->item(index)->setData(Qt::UserRole, QVariant::fromValue(item_data));
 }
 
