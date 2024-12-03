@@ -19,6 +19,7 @@
 #include "../../StyledItemDelegate/include/MessageDelegate.h"
 #include "../../Component/include/RoundImage.h"
 #include "../../Component/include/smoothlistwidget.h"
+#include "../../StyledItemDelegate/include/MessageItemWidget.h"
 class ChatTitle;
 class ChatMessageEdit;
 class SendMessageButton;

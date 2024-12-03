@@ -19,8 +19,8 @@ ChatWindow::ChatWindow(const UserData& user_data, QWidget* parent)
 	this->chat_list->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	chat_list->setSpacing(5);
 	this->chat_list->setFrameShape(QFrame::NoFrame);
-	MessageDelegate* delegate = new MessageDelegate(this);
-	this->chat_list->setItemDelegate(delegate);
+	//MessageDelegate* delegate = new MessageDelegate(this);
+	//this->chat_list->setItemDelegate(delegate);
 	this->chat_list->setPalette(pale);
 
 	this->message_edit = new ChatMessageEdit(this);
@@ -46,7 +46,11 @@ void ChatWindow::IncreaseMessageItem(const UserData& user_data)
 {
 	QListWidgetItem* item = new QListWidgetItem(this->chat_list);
 	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
+	MessageItemWidget* itemWidget = new MessageItemWidget(user_data, this);
+	item->setSizeHint(itemWidget->size());
+	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
 	this->chat_list->addItem(item);
+	this->chat_list->setItemWidget(item, itemWidget);
 	this->chat_list->scrollToBottom();
 }
 
@@ -106,16 +110,10 @@ void ChatWindow::setUploadFileItemProgress(const qreal& pos)
 	for (int i = 0; i < this->chat_list->count(); i++) {
 		QListWidgetItem* item = this->chat_list->item(i);
 		if (item) {
-			UserData data = item->data(Qt::UserRole).value<UserData>();
-			if (data.fileInfo.isUploading) {
-				data.fileInfo.position = pos;
-				item->setData(Qt::UserRole, QVariant::fromValue(data));
-				if (pos >= 1) {
-					data.fileInfo.position = pos;
-					data.fileInfo.isUploading = false;
-					item->setData(Qt::UserRole, QVariant::fromValue(data));
-					return;
-				}
+			MessageItemWidget* itemWidget = qobject_cast<MessageItemWidget*>(this->chat_list->itemWidget(item));
+			if (itemWidget && itemWidget->currentMessageItemData().fileInfo.isUploading) {
+				itemWidget->setSliderPosition(pos);
+				return;
 			}
 		}
 	}

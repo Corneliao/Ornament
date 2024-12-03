@@ -30,6 +30,11 @@ void ChatNetworkManager::initializeSocket()
 
 void ChatNetworkManager::sendApplication(const QString& receiver)
 {
+	if (this->isReceivingFile || this->isUploadingFile)
+	{
+		qDebug() << "当前正在下载文件或上传文件";
+		return;
+	}
 	QByteArray  out;
 	QDataStream stream(&out, QIODevice::WriteOnly);
 	int type = MSGTYPE::FriendApplication;
@@ -41,6 +46,11 @@ void ChatNetworkManager::sendApplication(const QString& receiver)
 
 void ChatNetworkManager::sendLoginInfo()
 {
+	if (this->isReceivingFile || this->isUploadingFile)
+	{
+		qDebug() << "当前正在下载文件或上传文件";
+		return;
+	}
 	QByteArray out;
 	QDataStream stream(&out, QIODevice::WriteOnly);
 	int type = MSGTYPE::Login;
@@ -52,6 +62,14 @@ void ChatNetworkManager::sendLoginInfo()
 
 void ChatNetworkManager::ReadData()
 {
+	if (this->isUploadingFile) {
+		return;
+	}
+
+	if (this->isReceivingFile) {
+		this->ReceiceFileData();
+		return;
+	}
 	QDataStream stream(this->socket);
 	int type;
 	stream >> type;
@@ -92,11 +110,18 @@ void ChatNetworkManager::ReadData()
 		SenderFileUserAccountTemp = senderAccount;
 		emit this->ReceiveFileForServertSignal(senderAccount, fileName, fileSize);
 		qDebug() << "我是" << GLOB_UserName << "收到：" << senderAccount << "文件" << fileName << fileSize;
+		this->ReceiveFileInfo(fileName, fileSize);
+		qDebug() << this->isUploadingFile;
 	}
 }
 
 void ChatNetworkManager::acceptApplication(const QString& userAccount)
 {
+	if (this->isReceivingFile || this->isUploadingFile)
+	{
+		qDebug() << "当前正在下载文件或上传文件";
+		return;
+	}
 	QByteArray out;
 	QDataStream stream(&out, QIODevice::WriteOnly);
 	int type = MSGTYPE::SendAcceptApplicationNotice;
@@ -106,6 +131,12 @@ void ChatNetworkManager::acceptApplication(const QString& userAccount)
 
 void ChatNetworkManager::sendUserNormalMessage(const QString& senderUserAccount, const QString& receiverUserAccount, const QString& message)
 {
+	if (this->isReceivingFile || this->isUploadingFile)
+	{
+		qDebug() << "当前正在下载文件或上传文件";
+		return;
+	}
+
 	QByteArray out;
 	QDataStream stream(&out, QIODevice::WriteOnly);
 	int type = MSGTYPE::NormalMessage;
@@ -115,6 +146,12 @@ void ChatNetworkManager::sendUserNormalMessage(const QString& senderUserAccount,
 
 void ChatNetworkManager::SendUserFile(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data)
 {
+	if (this->isReceivingFile || this->isUploadingFile)
+	{
+		qDebug() << "当前正在下载文件或上传文件";
+		return;
+	}
+
 	this->filePath = file_data.filePath;
 	this->fileTotalSize = file_data.fileSize.toLongLong();
 	qDebug() << __FUNCTION__ << __TIME__ << "获取到文件信息 ：" << "文件名：" << file_data.fileName << "文件大小：" << file_data.fileSize << "文件路径：" << file_data.filePath;
@@ -129,9 +166,13 @@ void ChatNetworkManager::SendFileDataToServer()
 {
 	QFile file(this->filePath);
 	if (!file.open(QFile::ReadOnly))
+	{
+		this->isUploadingFile = false;
+		this->fileTotalSize = 0;
 		return;
-	qDebug() << __LINE__ << __FUNCTION__ << "文件打开成功";
-	qint64 loadSize = static_cast<qint64>(64) * 1024;
+	}
+	this->isUploadingFile = true;
+	qint64 loadSize = static_cast<qint64>(200) * 1024;
 	qint64 alreadySendByteSize = 0;
 	qreal position = 0.0;
 	while (alreadySendByteSize != this->fileTotalSize)
@@ -147,13 +188,64 @@ void ChatNetworkManager::SendFileDataToServer()
 			else
 				return;
 		}
-		if (alreadySendByteSize == this->fileTotalSize) {
+		if (alreadySendByteSize >= this->fileTotalSize) {
+			this->isUploadingFile = false;
 			position = static_cast<qreal>(alreadySendByteSize * 1.0 / this->fileTotalSize);
 			emit this->updateUploadFileProgress(position);
 			this->fileTotalSize = 0;
 			file.close();
-
+			qDebug() << "发送完成";
 			return;
 		}
+	}
+}
+
+void ChatNetworkManager::ReceiveFileInfo(const QString& fileName, const qint64& fileSize)
+{
+	this->fileTotalSize = fileSize;
+	this->newFile.setFileName(fileName);
+	if (!this->newFile.open(QFile::WriteOnly))
+		return;
+	QByteArray out;
+	QDataStream stream(&out, QIODevice::WriteOnly);
+	//stream.setVersion(QDataStream::Qt_6_8);
+	int type = MSGTYPE::ReceivedFileInfo;
+	stream << type;
+	this->socket->write(out);
+	this->isReceivingFile = true;
+}
+
+void ChatNetworkManager::ReceiceFileData()
+{
+	QMutexLocker locker(&mutex);
+	qint64 byteSize = this->socket->bytesAvailable();
+
+	if (byteSize <= 0)
+	{
+		this->isReceivingFile = false;
+		return;
+	}
+
+	if (this->alreadyReceivedByteSize < this->fileTotalSize) {
+		this->position = static_cast<qreal>(this->alreadyReceivedByteSize * 1.0 / this->fileTotalSize);
+		//emit this->UpdateDownloadFileProgress(this->position);
+		qDebug() << "------------->" << this->position;
+
+		QByteArray FileData = this->socket->read(byteSize);
+		qint64 WrittenByteSize = this->newFile.write(FileData, FileData.size());
+		this->alreadyReceivedByteSize += WrittenByteSize;
+	}
+
+	if (this->alreadyReceivedByteSize == this->fileTotalSize) {
+		this->position = static_cast<qreal>(this->alreadyReceivedByteSize * 1.0 / this->fileTotalSize);
+		qDebug() << "------------->" << this->position;
+		//emit this->UpdateDownloadFileProgress(this->position);
+		this->fileTotalSize = 0;
+		this->alreadyReceivedByteSize = 0;
+		this->isReceivingFile = false;
+		this->position = 0.0;
+		this->newFile.close();
+		qDebug() << "接受完成";
+		return;
 	}
 }
