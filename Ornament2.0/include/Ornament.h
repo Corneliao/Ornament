@@ -26,13 +26,15 @@ class Ornament : public FramelessWindow
 public:
 	Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes, const QString& userName, const  int& userAccount, QWidget* parent = nullptr);
 	~Ornament();
-	void startSqlThread();
+
 	void deleteChatThread();
 protected:
 	void resizeEvent(QResizeEvent* event)Q_DECL_OVERRIDE;
 	bool eventFilter(QObject* target, QEvent* event)Q_DECL_OVERRIDE;
 	void mousePressEvent(QMouseEvent* event)Q_DECL_OVERRIDE;
 private:
+	void startSqlThread();
+	void startFileServiceThread();
 	void showTool();
 	void showAddFriend();
 	void showSystemNotification();
@@ -43,6 +45,7 @@ private:
 	void dealUserDisconnected(const QString& userAccount);
 	void dealReceiveFileForServer(const QString senderAccount, const QString fileName, const qint64 fileSize);
 	void updateUploadingFileProgress(const qreal& pos);
+	void updateDownloadFileProgress(const qreal& pos);
 private:
 	ApplicationTitleBar* application_title_Bar = Q_NULLPTR;
 	ApplicationFeaureBar* application_feature_Bar = Q_NULLPTR;
@@ -58,6 +61,8 @@ private:
 	AddFriend* addFriend = Q_NULLPTR;
 	SystemNotification* systemNotification = Q_NULLPTR;
 	QTimeLine* systemNotification_Animation = Q_NULLPTR;
+	QThread* filework_thread = Q_NULLPTR;
+	FileWork* file_work = Q_NULLPTR;
 
 signals:
 	void ToolStateSignal(bool isShow);
@@ -66,5 +71,4 @@ signals:
 	void SendFriendApplication(const QString& receiverAccount);
 	void isSendApplication(bool isSucceed);
 	void existTheUserSignal();
-	//void createChatWindowSignal();
 };

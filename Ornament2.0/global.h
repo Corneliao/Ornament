@@ -3,6 +3,7 @@
 #include <QPixmap>
 #include <QString>
 #include  <QListWidgetItem>
+#define DEBUGINFO qDebug() << __FILE__ << __FUNCTION__ << __LINE__
 extern qreal GLOB_ScaleDpi;
 extern bool GLOB_IsConnectedMysql;
 extern bool GLOB_IsConnectedServer;
@@ -10,16 +11,17 @@ extern int GLOB_UserAccount;
 extern QString GLOB_UserName;
 extern QSize screenSize;
 extern QByteArray GLOB_UserHeadImagebytes;
-//extern QMap<QString, QListWidgetItem*> FileItemQueue;
 extern QString SenderFileUserAccountTemp;
 extern QString ReceiverFileUserAccountTemp;
-//extern QPixmap GLOB_UserHead;
+extern qreal OneByteForMB;
+extern qreal OneByteForKB;
 
 enum  NoticeType { UserApplication };
 enum USERDATATYPE { UserApplicationData = 0, UpdateUserFriend };
 
 enum ChatMessageType { TEXT, USERFILE };
 enum FILETYPE { EXE, MUSIC };
+
 struct FeatureBarData {
 	QPixmap normal_ico;
 	QPixmap select_ico;
@@ -41,6 +43,7 @@ struct UserData {
 	QPixmap userHead;
 	QString userName;
 	QString userAccount;
+	QString receiverUserAccount;
 	bool status = false;
 	QPixmap status_ico;
 	QString status_text;
@@ -49,14 +52,10 @@ struct UserData {
 	Qt::Alignment alignment = Qt::AlignLeft;
 	int messageType = ChatMessageType::TEXT;
 	FileInfoData fileInfo;
+	bool isUnread = false;
+	int unReadMessageNums = 0;
 };
 
-//struct FriendChatData {
-//	QPixmap userHead;
-//	QString userName;
-//	QString userMessage;
-//	bool status = false;
-//};
 struct SearchFriendData {
 	QByteArray imagebytes;
 	QString userName;
@@ -64,11 +63,8 @@ struct SearchFriendData {
 	QString userAccount;
 };
 
-//struct FriendListData {
-//	QPixmap userHead;
-//	QString userName;
-//	bool status = false;
-//	QString userAccount;
-//	QPixmap status_ico;
-//	QString status_text;
-//};
+struct FILETASKQUEUE {
+	QString senderUser;
+	QString receiverUser;
+	FileInfoData fileInfo;
+};

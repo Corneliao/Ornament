@@ -10,17 +10,15 @@ ChatWindow::ChatWindow(const UserData& user_data, QWidget* parent)
 	this->setLayout(main_vbox);
 
 	this->chat_title = new ChatTitle(user_data.userName, user_data.userHead, this);
-
 	QPalette pale;
 	pale.setColor(QPalette::Window, Qt::transparent);
 
 	this->chat_list = new QListWidget(this);
 	this->chat_list->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 	this->chat_list->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+	this->chat_list->setStyleSheet("QListWidget::item:hover{background:transparent};");
 	chat_list->setSpacing(5);
 	this->chat_list->setFrameShape(QFrame::NoFrame);
-	//MessageDelegate* delegate = new MessageDelegate(this);
-	//this->chat_list->setItemDelegate(delegate);
 	this->chat_list->setPalette(pale);
 
 	this->message_edit = new ChatMessageEdit(this);
@@ -45,7 +43,7 @@ UserData ChatWindow::currentUserData() const
 void ChatWindow::IncreaseMessageItem(const UserData& user_data)
 {
 	QListWidgetItem* item = new QListWidgetItem(this->chat_list);
-	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
+	item->setFlags(item->flags() & ~Qt::ItemIsSelectable);
 	MessageItemWidget* itemWidget = new MessageItemWidget(user_data, this);
 	item->setSizeHint(itemWidget->size());
 	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
@@ -65,15 +63,16 @@ void ChatWindow::dealUserSendMessage(const QString& message)
 	user_data.userMessage = message;
 	user_data.messageType = ChatMessageType::TEXT;
 	user_data.index = this->m_userData.index;
+	user_data.receiverUserAccount = this->m_userData.userAccount;
 
 	this->IncreaseMessageItem(user_data);
+	emit this->modifyChatListItemData(user_data);
 
 	if (!this->m_userData.status)
 	{
 		qDebug() << "当前好友未在线";
 		return;
 	}
-
 	emit this->SendUserMessage(QString::number(GLOB_UserAccount), this->m_userData.userAccount, message);
 }
 
@@ -91,16 +90,18 @@ void ChatWindow::IncreaseMessageItemForEXE(const FileInfoData& file_data)
 	QPixmap userHead = RoundImage::RoundImageFromByteArray(GLOB_UserHeadImagebytes);
 	user_data.userHead = userHead;
 	user_data.fileInfo = file_data;
+	user_data.fileInfo.fileSize = QString::number(file_data.fileSize.toLongLong() * 1.0 * OneByteForMB, 'f', 2) + "MB";
 	user_data.fileInfo.isUploading = true;
 	user_data.messageType = ChatMessageType::USERFILE;
 	user_data.index = this->m_userData.index;
+	user_data.receiverUserAccount = this->m_userData.userAccount;
 
 	this->IncreaseMessageItem(user_data);
-
-	/*if (!this->m_userData.status)
-		return;*/
+	emit this->modifyChatListItemData(user_data);
+	if (!this->m_userData.status)
+		return;
 	ReceiverFileUserAccountTemp = this->m_userData.userAccount;
-	emit this->SendUserMessageForUserFile(QString::number(GLOB_UserAccount), this->m_userData.userAccount, file_data);
+	emit this->SendUserMessageForUserFileSignal(QString::number(GLOB_UserAccount), this->m_userData.userAccount, file_data);
 }
 
 void ChatWindow::setUploadFileItemProgress(const qreal& pos)
@@ -112,6 +113,22 @@ void ChatWindow::setUploadFileItemProgress(const qreal& pos)
 		if (item) {
 			MessageItemWidget* itemWidget = qobject_cast<MessageItemWidget*>(this->chat_list->itemWidget(item));
 			if (itemWidget && itemWidget->currentMessageItemData().fileInfo.isUploading) {
+				itemWidget->setSliderPosition(pos);
+				return;
+			}
+		}
+	}
+}
+
+void ChatWindow::updateDownloadFileItemProgress(const qreal& pos)
+{
+	if (this->m_userData.userAccount != SenderFileUserAccountTemp)
+		return;
+	for (int i = 0; i < this->chat_list->count(); i++) {
+		QListWidgetItem* item = this->chat_list->item(i);
+		if (item) {
+			MessageItemWidget* itemWidget = qobject_cast<MessageItemWidget*>(this->chat_list->itemWidget(item));
+			if (itemWidget && itemWidget->currentMessageItemData().fileInfo.isDownloading) {
 				itemWidget->setSliderPosition(pos);
 				return;
 			}
@@ -217,6 +234,8 @@ bool ChatMessageEdit::eventFilter(QObject* target, QEvent* event)
 		if (event->type() == QEvent::KeyPress) {
 			QKeyEvent* key = reinterpret_cast<QKeyEvent*>(event);
 			if (key->key() == Qt::Key_Return) {
+				if (this->message_edit->toPlainText().isEmpty())
+					return true;
 				emit this->SendUserMessage(this->message_edit->toPlainText());
 				this->message_edit->clear();
 				return true;
@@ -240,11 +259,11 @@ bool ChatMessageEdit::eventFilter(QObject* target, QEvent* event)
 				FileInfoData data;
 				data.filePath = filePath;
 				QFileInfo info(filePath);
-				if (info.suffix() == "exe") {
-					pixmap.load(":/Resource/ico/exe.png");
-					data.fileIco = pixmap;
+				if (info.suffix() == "exe")
 					data.FileType = FILETYPE::EXE;
-				}
+				else if (info.suffix() == "mp3")
+					data.FileType = FILETYPE::MUSIC;
+
 				QString fileName = info.fileName();
 				data.fileName = fileName;
 				data.fileSize = QString::number(info.size());

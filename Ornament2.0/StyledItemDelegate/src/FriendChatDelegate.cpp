@@ -37,7 +37,7 @@ void FriendChatDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 	temp.adjustSize();
 
 	QString message;
-	if (temp.width() > 100)
+	if (temp.width() > 80)
 		message = temp.text().left(8) + "...";
 
 	else
@@ -75,6 +75,28 @@ void FriendChatDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 	painter->setBrush(Qt::NoBrush);
 	painter->drawText(userMessageRect, Qt::AlignLeft, message);
 	painter->restore();
+
+	if (user_data.isUnread) {
+		QRectF unread_rect = QRectF(QPointF(item_rect.right() - 20, (userMessageRect.center().y() - static_cast<qreal>(15) / 2)), QSize(15 , 15));
+		painter->save();
+		painter->setPen(Qt::NoPen);
+		painter->setBrush(Qt::red);
+		painter->drawEllipse(unread_rect);
+		painter->restore();
+
+		QFont font;
+		font.setPixelSize(8);
+
+		QRectF nums_rect;
+		nums_rect.setSize(QSize(unread_rect.width() - 4, unread_rect.height() - 4));
+		nums_rect.moveCenter(unread_rect.center());
+		painter->save();
+		painter->setPen(Qt::white);
+		painter->setFont(font);
+		painter->setBrush(Qt::NoBrush);
+		painter->drawText(nums_rect,Qt::AlignCenter,QString::number(user_data.unReadMessageNums));
+		painter->restore();
+	}
 }
 
 QSize FriendChatDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const

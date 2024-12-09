@@ -33,5 +33,7 @@
         <file>Resource/ico/file_sel.png</file>
         <file>Resource/ico/file_unsel.png</file>
         <file>Resource/ico/exe.png</file>
+        <file>Resource/font/flache.ttf</file>
+        <file>Resource/ico/mp3.png</file>
     </qresource>
 </RCC>

@@ -6,12 +6,14 @@
 #include <QFile>
 #include <QMutex>
 #include"../global.h"
+#include "FileWork.h"
+
 class ChatNetworkManager : public QObject
 {
 	Q_OBJECT
 		enum MSGTYPE {
-		Login = 0, NoticeNewLogin, FriendApplication, WaitAcceptApplication, SendAcceptApplicationNotice, AcceptedApplication, NormalMessage, SendNormalMessage, SendUserDisconnected
-		, SendFileInfo, ReceivedFileInfo, SendFileData
+		Login = 0, NoticeNewLogin, FriendApplication, WaitAcceptApplication, SendAcceptApplicationNotice,
+		AcceptedApplication, NormalMessage, SendNormalMessage, SendUserDisconnected
 	};
 public:
 	ChatNetworkManager(QObject* parent = Q_NULLPTR);
@@ -23,20 +25,10 @@ public:
 	void ReadData();
 	void acceptApplication(const QString& userAccount);
 	void sendUserNormalMessage(const QString& senderUserAccount, const QString& receiverUserAccount, const QString& message);
-	void SendUserFile(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data);
-	void SendFileDataToServer();
-	void ReceiveFileInfo(const QString& fileName, const qint64& fileSize);
-	void ReceiceFileData();
 private:
 	QTcpSocket* socket = Q_NULLPTR;
-	QString filePath;
-	QFile  newFile;
-	qint64 alreadyReceivedByteSize = 0;
-	qint64 fileTotalSize = 0;
-	qreal position = 0.0;
-	bool isReceivingFile = false;
-	bool isUploadingFile = false;
 	QMutex mutex;
+
 signals:
 	void connecterrorSignal();
 	void connectedSignal();
@@ -45,7 +37,4 @@ signals:
 	void acceptUserApplication(const QString& userAccount, int DataType);
 	void acceptUserNormalMessage(const QString& senderUserAccount, const QString& message);
 	void userDisconnectedSignal(const QString& userAccount);
-	void ReceiveFileForServertSignal(const QString senderAccount, const QString fileName, const qint64 fileSize);
-	void updateUploadFileProgress(const qreal& pos);
-	void UpdateDownloadFileProgress(const qreal& pos);
 };

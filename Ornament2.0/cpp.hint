@@ -7,3 +7,5 @@
 #define Q_NULLPTR
 #define emit
 #define signals
+#define Q_SIGNALS public QT_ANNOTATE_ACCESS_SPECIFIER(qt_signal)
+#define Q_SIGNALS

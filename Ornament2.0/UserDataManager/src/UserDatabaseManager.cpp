@@ -8,7 +8,7 @@ UserDatabaseManager::UserDatabaseManager(const QString& connect_name)
 
 UserDatabaseManager::~UserDatabaseManager()
 {
-	qDebug() << __FUNCTION__ << __TIME__ << "do work deleter";
+	DEBUGINFO << "数据库线程销毁" << QThread::currentThreadId();
 	this->closeDatabase();
 }
 
@@ -359,6 +359,7 @@ void UserDatabaseManager::addUserFriend(const QString& userAccount)
  */
 void UserDatabaseManager::iniSql()
 {
+	DEBUGINFO << "数据库线程：" << QThread::currentThreadId();
 	QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL", this->connectName);
 	db.setUserName("root");
 	db.setPassword("y..750242");

@@ -35,7 +35,8 @@ public:
 	void dealUserSendMessage(const QString& message);
 	void setChatWindowData(const UserData& user_data);
 	void IncreaseMessageItemForEXE(const FileInfoData& file_data);
-	void setUploadFileItemProgress(const qreal & pos);
+	void setUploadFileItemProgress(const qreal& pos);
+	void updateDownloadFileItemProgress(const qreal& pos);
 private:
 	UserData m_userData;
 	ChatTitle* chat_title = Q_NULLPTR;
@@ -44,7 +45,8 @@ private:
 	ChatMessageEdit* message_edit = Q_NULLPTR;
 signals:
 	void SendUserMessage(const QString& senderUserAccount, const QString& receiverUserAccount, const QString& message);
-	void SendUserMessageForUserFile(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data);
+	void SendUserMessageForUserFileSignal(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data);
+	void modifyChatListItemData(const  UserData & user_data);
 };
 
 class ChatTitle :public QWidget {

@@ -34,6 +34,7 @@ FriendChatList::FriendChatList(QWidget* parent)
 	this->chat_listWidget = new QListWidget(this);
 	this->chat_listWidget->setPalette(pale);
 	this->chat_listWidget->setFrameShape(QFrame::NoFrame);
+	this->chat_listWidget->sortItems(Qt::DescendingOrder);
 
 	FriendChatDelegate* delegate = new  FriendChatDelegate(this);
 	this->chat_listWidget->setItemDelegate(delegate);
@@ -51,7 +52,8 @@ FriendChatList::~FriendChatList()
 
 void FriendChatList::increaseFriendItem(QListWidgetItem* item)
 {
-	this->chat_listWidget->addItem(item);
+	ListWidgetItem* my_item = dynamic_cast<ListWidgetItem*>(item);
+	this->chat_listWidget->addItem(my_item);
 }
 
 int FriendChatList::isExistFriendChatItem(const QString& account)
@@ -81,21 +83,29 @@ void FriendChatList::setItemSelected(const QString& account)
 
 void FriendChatList::setItemData(int index, const UserData& user_data)
 {
-	UserData item_data = this->chat_listWidget->item(index)->data(Qt::UserRole).value<UserData>();
-	item_data.alignment = Qt::AlignLeft;
-	if (user_data.messageType == ChatMessageType::TEXT) {
-		item_data.userMessage = user_data.userMessage;
-	}
-	else {
-		item_data.userMessage = "[文件]" + user_data.fileInfo.fileName;
+	QListWidgetItem* item = this->chat_listWidget->item(index);
+	UserData item_data = item->data(Qt::UserRole).value<UserData>();
+	if (!item->isSelected()) {
+		if (!item_data.isUnread)
+			item_data.isUnread = true;
+		item_data.unReadMessageNums++;
 	}
 
-	this->chat_listWidget->item(index)->setData(Qt::UserRole, QVariant::fromValue(item_data));
+	if (user_data.messageType == ChatMessageType::TEXT)
+		item_data.userMessage = user_data.userMessage;
+	else if (user_data.messageType == ChatMessageType::USERFILE)
+		item_data.userMessage = "[文件]" + user_data.fileInfo.fileName;
+	item->setData(Qt::UserRole, QVariant::fromValue(item_data));
 }
 
-void FriendChatList::dealItemClicked(const QListWidgetItem* item)
+void FriendChatList::dealItemClicked(QListWidgetItem* item)
 {
 	UserData user_data = item->data(Qt::UserRole).value<UserData>();
+	if (user_data.unReadMessageNums != 0) {
+		user_data.unReadMessageNums = 0;
+		user_data.isUnread = false;
+		item->setData(Qt::UserRole, QVariant::fromValue(user_data));
+	}
 	emit this->FriendChatItemChanged(user_data);
 }
 
@@ -115,4 +125,21 @@ void FriendChatList::paintEvent(QPaintEvent*)
 	painter.setBrush(Qt::transparent);
 	painter.drawRoundedRect(this->rect(), 15, 15);
 	painter.restore();
+}
+
+ListWidgetItem::ListWidgetItem()
+{
+}
+
+ListWidgetItem::~ListWidgetItem()
+{
+}
+
+bool ListWidgetItem::operator<(const QListWidgetItem& other) const
+{
+	UserData user_data = other.data(Qt::UserRole).value<UserData>();
+	if (user_data.isUnread) {
+		return user_data.isUnread;
+	}
+	return QListWidgetItem::operator<(other);
 }

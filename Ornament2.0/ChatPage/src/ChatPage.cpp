@@ -47,6 +47,8 @@ void ChatPage::CreateChatWindow(UserData& user_data)
 	if (user_data.messageType == ChatMessageType::USERFILE) {
 		user_data.userMessage = "[文件]" + user_data.fileInfo.fileName;
 	}
+	user_data.isUnread = true;
+	user_data.unReadMessageNums++;
 	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
 	this->ChatItemAndChatWindow.insert(item, chat_window);
 	this->friendChat_list->increaseFriendItem(item);
@@ -61,8 +63,10 @@ void ChatPage::CreateChatWindow(UserData& user_data)
 		}
 	}
 	connect(chat_window, &ChatWindow::SendUserMessage, this, &ChatPage::SendUserMessage, Qt::DirectConnection);
-	connect(chat_window, &ChatWindow::SendUserMessageForUserFile, this, &ChatPage::SendUserMessageForUserFile, Qt::DirectConnection);
+	connect(chat_window, &ChatWindow::SendUserMessageForUserFileSignal, this, &ChatPage::SendUserMessageForUserFileSignal, Qt::DirectConnection);
 	connect(this, &ChatPage::setFileItemProgressSignal, chat_window, &ChatWindow::setUploadFileItemProgress, Qt::DirectConnection);
+	connect(this, &ChatPage::updateDownloadFileProgressSignal, chat_window, &ChatWindow::updateDownloadFileItemProgress, Qt::DirectConnection);
+	connect(chat_window, &ChatWindow::modifyChatListItemData, this, &ChatPage::modifyChatListItemData, Qt::DirectConnection);
 }
 
 /**
@@ -84,8 +88,10 @@ void ChatPage::DoubleClickCreateChatWindow(UserData& user_data)
 	this->friendChat_list->increaseFriendItem(item);
 	this->friendChat_list->setItemSelected(user_data.userAccount);
 	connect(chat_window, &ChatWindow::SendUserMessage, this, &ChatPage::SendUserMessage, Qt::DirectConnection);
-	connect(chat_window, &ChatWindow::SendUserMessageForUserFile, this, &ChatPage::SendUserMessageForUserFile, Qt::DirectConnection);
+	connect(chat_window, &ChatWindow::SendUserMessageForUserFileSignal, this, &ChatPage::SendUserMessageForUserFileSignal, Qt::DirectConnection);
 	connect(this, &ChatPage::setFileItemProgressSignal, chat_window, &ChatWindow::setUploadFileItemProgress, Qt::DirectConnection);
+	connect(this, &ChatPage::updateDownloadFileProgressSignal, chat_window, &ChatWindow::updateDownloadFileItemProgress, Qt::DirectConnection);
+	connect(chat_window, &ChatWindow::modifyChatListItemData, this, &ChatPage::modifyChatListItemData, Qt::DirectConnection);
 }
 
 /**
@@ -118,6 +124,18 @@ void ChatPage::itemChanged(UserData& user_data)
 void ChatPage::setUploadFileItemProgress(const qreal& pos)
 {
 	emit this->setFileItemProgressSignal(pos);
+}
+
+void ChatPage::updateDownloadFileProgress(const qreal& pos)
+{
+	emit this->updateDownloadFileProgressSignal(pos);
+}
+
+void ChatPage::modifyChatListItemData(const UserData& user_data)
+{
+	int isExist = this->friendChat_list->isExistFriendChatItem(user_data.receiverUserAccount);
+	if (isExist != -1)
+		this->friendChat_list->setItemData(isExist, user_data);
 }
 
 void ChatPage::paintEvent(QPaintEvent*)

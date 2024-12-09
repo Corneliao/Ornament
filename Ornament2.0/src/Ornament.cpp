@@ -87,14 +87,13 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	connect(this->chat_thread, &QThread::started, this->chat_network_manager, &ChatNetworkManager::initializeSocket, Qt::DirectConnection);
 	this->chat_thread->start();
 	connect(this->chat_network_manager, &ChatNetworkManager::connectedSignal, this, &Ornament::startSqlThread, Qt::QueuedConnection);
+	connect(this->chat_network_manager, &ChatNetworkManager::connectedSignal, this, &Ornament::startFileServiceThread, Qt::QueuedConnection);
+
 	connect(this->chat_network_manager, &ChatNetworkManager::connecterrorSignal, this, &Ornament::deleteChatThread, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::UserLogined, this->friend_page, &FriendPage::updateFriendCurrentStatus, Qt::QueuedConnection);
 	connect(this->chat_page, &ChatPage::SendUserMessage, this->chat_network_manager, &ChatNetworkManager::sendUserNormalMessage, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::acceptUserNormalMessage, this, &Ornament::dealAcceptUserNormalMessage, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::userDisconnectedSignal, this, &Ornament::dealUserDisconnected, Qt::QueuedConnection);
-	connect(this->chat_page, &ChatPage::SendUserMessageForUserFile, this->chat_network_manager, &ChatNetworkManager::SendUserFile, Qt::QueuedConnection);
-	connect(this->chat_network_manager, &ChatNetworkManager::ReceiveFileForServertSignal, this, &Ornament::dealReceiveFileForServer, Qt::QueuedConnection);
-	connect(this->chat_network_manager, &ChatNetworkManager::updateUploadFileProgress, this, &Ornament::updateUploadingFileProgress, Qt::QueuedConnection);
 }
 
 Ornament::~Ornament()
@@ -127,13 +126,26 @@ void Ornament::startSqlThread()
 	connect(this->userDataBase, &UserDatabaseManager::updateFriendListDataSignal, this->friend_page, &FriendPage::IncreaseNewUserItem, Qt::QueuedConnection);
 }
 
+void Ornament::startFileServiceThread()
+{
+	this->filework_thread = new QThread;
+	this->file_work = new FileWork;
+	this->file_work->moveToThread(this->filework_thread);
+	connect(this->filework_thread, &QThread::started, this->file_work, &FileWork::initializeFileSocket, Qt::DirectConnection);
+	this->filework_thread->start();
+	connect(this->chat_page, &ChatPage::SendUserMessageForUserFileSignal, this->file_work, &FileWork::SendFileInfo, Qt::QueuedConnection);
+	connect(this->file_work, &FileWork::updateUploadFileProgressSignal, this, &Ornament::updateUploadingFileProgress, Qt::QueuedConnection);
+	connect(this->file_work, &FileWork::ReceiveFileSignal, this, &Ornament::dealReceiveFileForServer, Qt::QueuedConnection);
+	connect(this->file_work, &FileWork::updateDownloadFileProgressSignal, this, &Ornament::updateDownloadFileProgress, Qt::QueuedConnection);
+}
+
 void Ornament::deleteChatThread()
 {
 	if (this->chat_thread != Q_NULLPTR) {
 		this->chat_network_manager->deleteLater();
 		this->chat_network_manager = Q_NULLPTR;
 
-		this->chat_thread->quit();
+		this->chat_thread->exit();
 		this->chat_thread->wait();
 		this->chat_thread->deleteLater();
 		this->chat_thread = Q_NULLPTR;
@@ -142,10 +154,21 @@ void Ornament::deleteChatThread()
 			this->userDataBase->deleteLater();
 			this->userDataBase = Q_NULLPTR;
 
-			this->sql_thread->quit();
+			this->sql_thread->exit();
 			this->sql_thread->wait();
 			this->sql_thread->deleteLater();
 			this->sql_thread = Q_NULLPTR;
+		}
+
+		if (this->filework_thread) {
+			this->file_work->deleteLater();
+			this->file_work = Q_NULLPTR;
+
+			this->filework_thread->requestInterruption();
+			this->filework_thread->exit(0);
+			this->filework_thread->wait();
+			this->filework_thread->deleteLater();
+			this->filework_thread = Q_NULLPTR;
 		}
 	}
 }
@@ -221,6 +244,8 @@ void Ornament::dealAcceptUserNormalMessage(const QString& senderUserAccount, con
 	user_data.alignment = Qt::AlignLeft;
 	user_data.messageType = ChatMessageType::TEXT;
 	this->chat_page->CreateChatWindow(user_data);
+	QPixmap pixmap = user_data.userHead;
+	SystemTrayIconNotification::getInstence()->showMessage(user_data.userName, message, pixmap);
 }
 
 void Ornament::dealUserDisconnected(const QString& userAccount)
@@ -232,23 +257,31 @@ void Ornament::dealReceiveFileForServer(const QString senderAccount, const QStri
 {
 	UserData user_data = this->friend_page->getUserData(senderAccount);
 	QString suffix = fileName.right(3);
-	QPixmap file_ico;
-	if (suffix == "exe") {
-		file_ico.load(":/Resource/ico/exe.png");
+	if (suffix == "exe")
 		user_data.fileInfo.FileType = FILETYPE::EXE;
-	}
+
+	if (suffix == "mp3")
+		user_data.fileInfo.FileType = FILETYPE::MUSIC;
 
 	user_data.fileInfo.fileName = fileName;
-	user_data.fileInfo.fileSize = QString::number(fileSize);
+	user_data.fileInfo.fileSize = QString::number(fileSize * 1.0 * OneByteForMB, 'f', 2) + "MB";
 	user_data.alignment = Qt::AlignLeft;
 	user_data.messageType = ChatMessageType::USERFILE;
 	user_data.fileInfo.isDownloading = true;
 	this->chat_page->CreateChatWindow(user_data);
+	QString message = QString("[文件]") + fileName;
+	QPixmap pixmap = user_data.userHead;
+	SystemTrayIconNotification::getInstence()->showMessage(user_data.userName, message, pixmap);
 }
 
 void Ornament::updateUploadingFileProgress(const qreal& pos)
 {
 	this->chat_page->setUploadFileItemProgress(pos);
+}
+
+void Ornament::updateDownloadFileProgress(const qreal& pos)
+{
+	this->chat_page->updateDownloadFileProgress(pos);
 }
 
 void Ornament::mousePressEvent(QMouseEvent* event)
