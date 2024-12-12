@@ -3,6 +3,7 @@
 FileWork::FileWork(QObject* parent)
 	: QObject(parent)
 {
+	qRegisterMetaType<FileInfoData>("FileInfoData&");
 }
 
 FileWork::~FileWork()
@@ -14,6 +15,7 @@ void FileWork::initializeFileSocket()
 {
 	DEBUGINFO << "文件传输线程：" << QThread::currentThreadId();
 	this->m_fileSocket = new  QTcpSocket(this);
+	this->m_fileSocket->setSocketOption(QAbstractSocket::KeepAliveOption, true);
 	//this->m_fileSocket->connectToHost(QHostAddress("120.46.157.203"), quint16(7028));
 	this->m_fileSocket->connectToHost(QHostAddress("127.0.0.1"), quint16(7028));
 	if (!this->m_fileSocket->waitForConnected()) {
@@ -31,16 +33,16 @@ void FileWork::initializeFileSocket()
 
 void FileWork::SendFileInfo(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data)
 {
-	if (this->isReceiveingFile) {
-		qDebug() << "当前正在接受文件,已加入队列";
-		FILETASKQUEUE task;
-		task.senderUser = senderUserAccount;
-		task.receiverUser = receiverUserAccount;
-		task.fileInfo = file_data;
-		this->FILETASKS.enqueue(task);
-		return;
-	}
-	QMutexLocker locker(&this->m_mutex);
+	//if (this->isReceiveingFile) {
+	//	qDebug() << "当前正在接受文件,已加入队列";
+	//	FILETASKQUEUE task;
+	//	task.senderUser = senderUserAccount;
+	//	task.receiverUser = receiverUserAccount;
+	//	task.fileInfo = file_data;
+	//	this->FILETASKS.enqueue(task);
+	//	return;
+	//}
+	//QMutexLocker locker(&this->m_mutex);
 	DEBUGINFO << "文件信息：" << file_data.fileName << file_data.fileSize << "发送者：" << senderUserAccount << "接收者：" << receiverUserAccount;
 	this->m_filePath_temp = file_data.filePath;
 	this->m_fileTotalSize_temp = file_data.fileSize.toLongLong();
@@ -53,7 +55,6 @@ void FileWork::SendFileInfo(const QString& senderUserAccount, const QString& rec
 
 void FileWork::SendFileData()
 {
-	//	QMutexLocker locker(&this->m_mutex);
 	this->localFile.setFileName(this->m_filePath_temp);
 	if (!this->localFile.open(QFile::ReadOnly)) {
 		qDebug() << __FUNCTION__ << "文件打开失败";
@@ -64,10 +65,8 @@ void FileWork::SendFileData()
 	qint64 alreadyWrittenByteSize = 0;
 	qreal position = 0.0;
 	while (alreadyWrittenByteSize != this->m_fileTotalSize_temp) {
-		if (QThread::currentThread()->isInterruptionRequested()) {
-			this->initFileInfoProperties();
+		if (QThread::currentThread()->isInterruptionRequested())
 			return;
-		}
 		if (alreadyWrittenByteSize < this->m_fileTotalSize_temp) {
 			position = alreadyWrittenByteSize * 1.0 / this->m_fileTotalSize_temp;
 			emit this->updateUploadFileProgressSignal(position);
@@ -92,10 +91,16 @@ void FileWork::SendFileData()
 	}
 }
 
-bool FileWork::currentStatus() const
+bool FileWork::currentUploadStatus() const
 {
 	return this->isUploadingFile;
 }
+
+bool FileWork::currentReceiveStatus()const {
+	return this->isReceiveingFile;
+}
+
+
 
 void FileWork::ReadData()
 {
@@ -124,6 +129,7 @@ void FileWork::ReadData()
 
 void FileWork::ReceiveFileInfo(const QString& fileName)
 {
+	this->fileName = fileName;
 	this->newFile.setFileName(fileName);
 	if (!this->newFile.open(QFile::WriteOnly)) {
 		DEBUGINFO << "文件打开失败";
@@ -161,10 +167,13 @@ void FileWork::ReceiveFileData()
 		this->m_position = this->alreadyReceivedBytes * 1.0 / this->m_fileTotalSize_temp;
 		emit this->updateDownloadFileProgressSignal(this->m_position);
 		qDebug() << "接受完成";
+		emit this->finishedForImage(SenderFileUserAccountTemp, this->fileName, QString::number(this->m_fileTotalSize_temp));
 		this->newFile.close();
 		this->alreadyReceivedBytes = 0;
+		this->m_fileTotalSize_temp = 0;
 		this->isReceiveingFile = false;
 		emit this->completeReceivedFile();
+
 		return;
 	}
 }

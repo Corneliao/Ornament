@@ -35,5 +35,8 @@
         <file>Resource/ico/exe.png</file>
         <file>Resource/font/flache.ttf</file>
         <file>Resource/ico/mp3.png</file>
+        <file>Resource/ico/photo.png</file>
+        <file>Resource/ico/wait_trans_sel.png</file>
+        <file>Resource/ico/wait_trans_unsel.png</file>
     </qresource>
 </RCC>

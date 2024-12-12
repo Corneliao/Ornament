@@ -34,7 +34,7 @@ FriendChatList::FriendChatList(QWidget* parent)
 	this->chat_listWidget = new QListWidget(this);
 	this->chat_listWidget->setPalette(pale);
 	this->chat_listWidget->setFrameShape(QFrame::NoFrame);
-	this->chat_listWidget->sortItems(Qt::DescendingOrder);
+	this->chat_listWidget->sortItems(Qt::AscendingOrder);
 
 	FriendChatDelegate* delegate = new  FriendChatDelegate(this);
 	this->chat_listWidget->setItemDelegate(delegate);
@@ -50,10 +50,12 @@ FriendChatList::~FriendChatList()
 {
 }
 
-void FriendChatList::increaseFriendItem(QListWidgetItem* item)
+void FriendChatList::increaseFriendItem(ListWidgetItem* item)
 {
-	ListWidgetItem* my_item = dynamic_cast<ListWidgetItem*>(item);
-	this->chat_listWidget->addItem(my_item);
+	//	ListWidgetItem* my_item = qobject_cast<ListWidgetItem*>(item);
+		//my_item->setData(Qt::UserRole, QVariant::fromValue(item->data(Qt::UserRole).value<UserData>()));
+	this->chat_listWidget->addItem(item);
+	this->chat_listWidget->sortItems(Qt::DescendingOrder);
 }
 
 int FriendChatList::isExistFriendChatItem(const QString& account)
@@ -109,6 +111,12 @@ void FriendChatList::dealItemClicked(QListWidgetItem* item)
 	emit this->FriendChatItemChanged(user_data);
 }
 
+UserData FriendChatList::getItemData(int index) const
+{
+	UserData  user_data = this->chat_listWidget->item(index)->data(Qt::UserRole).value<UserData>();
+	return user_data;
+}
+
 void FriendChatList::paintEvent(QPaintEvent*)
 {
 	QPainter painter(this);
@@ -137,9 +145,15 @@ ListWidgetItem::~ListWidgetItem()
 
 bool ListWidgetItem::operator<(const QListWidgetItem& other) const
 {
-	UserData user_data = other.data(Qt::UserRole).value<UserData>();
-	if (user_data.isUnread) {
-		return user_data.isUnread;
+	UserData m_user_data = this->data(Qt::UserRole).value<UserData>();
+	const ListWidgetItem* item = dynamic_cast<const ListWidgetItem*>(&other);
+	UserData other_data = item->data(Qt::UserRole).value<UserData>();
+	if (&other) {
+		if (m_user_data.status != other_data.status)
+			return m_user_data.status < other_data.status;
+		else
+			return m_user_data.userName < other_data.userAccount;
 	}
+
 	return QListWidgetItem::operator<(other);
 }

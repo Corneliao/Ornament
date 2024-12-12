@@ -35,4 +35,5 @@ signals:
 	void SendUserMessageForUserFileSignal(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data);
 	void setFileItemProgressSignal(const qreal pos);
 	void updateDownloadFileProgressSignal(const qreal& pos);
+	void resizeMainWindowSize(bool isShow);
 };

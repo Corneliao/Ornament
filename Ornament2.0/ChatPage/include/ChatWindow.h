@@ -20,6 +20,7 @@
 #include "../../Component/include/RoundImage.h"
 #include "../../Component/include/smoothlistwidget.h"
 #include "../../StyledItemDelegate/include/MessageItemWidget.h"
+#include "FileQueueList.h"
 class ChatTitle;
 class ChatMessageEdit;
 class SendMessageButton;
@@ -43,10 +44,12 @@ private:
 	int currentChatWindowIndex = 0;
 	QListWidget* chat_list = Q_NULLPTR;
 	ChatMessageEdit* message_edit = Q_NULLPTR;
+	FileQueueList* file_list = Q_NULLPTR;
 signals:
 	void SendUserMessage(const QString& senderUserAccount, const QString& receiverUserAccount, const QString& message);
 	void SendUserMessageForUserFileSignal(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data);
-	void modifyChatListItemData(const  UserData & user_data);
+	void modifyChatListItemData(const  UserData& user_data);
+	void resizeMainWindowSize(bool isShow);
 };
 
 class ChatTitle :public QWidget {
@@ -73,10 +76,12 @@ private:
 	SendMessageButton* send_button = Q_NULLPTR;
 	QLabel* file_button = Q_NULLPTR;
 	QLabel* emoji_button = Q_NULLPTR;
-signals:
+	QLabel* waitTransferFile_button = Q_NULLPTR;
+Q_SIGNALS:
 	void SendUserMessage(const QString& message);
 	void MyMessageSignal(const QString& message);
 	void MyMessageForFileSignal(const FileInfoData& file_data);
+	void waitingFileQueueButtonClicked();
 };
 
 class SendMessageButton :public QWidget {

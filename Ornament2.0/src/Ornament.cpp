@@ -3,6 +3,8 @@
 Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes, const QString& userName, const  int& userAccount, QWidget* parent)
 	: FramelessWindow(parent)
 {
+	qRegisterMetaType<FileInfoData>("FileInfoData&");
+
 	this->setWindowIcon(QIcon(":/Resource/ico/TablerBrandUnity.png"));
 
 	qRegisterMetaType<QList<UserData>>("QList<UserData>");
@@ -46,12 +48,16 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	this->systemNotification->setGeometry(QRect(QPoint(this->rect().right() + 5, this->rect().center().y() - (this->systemNotification->height() / 2)), QSize(this->systemNotification->size())));
 	this->systemNotification->hide();
 
-	connect(this->systemNotification, &SystemNotification::updateFriendList, this->friend_page, &FriendPage::IncreaseNewUserItem, Qt::DirectConnection);
-
 	this->systemNotification_Animation = new QTimeLine(300, this);
 	this->systemNotification_Animation->setEasingCurve(QEasingCurve::InOutSine);
 	this->systemNotification_Animation->setUpdateInterval(0);
 	this->systemNotification_Animation->setFrameRange(this->rect().right() + 5, this->rect().right() - (this->systemNotification->width() + 10));
+
+	this->resizeWindowAnimation = new QPropertyAnimation(this, "size", this);
+	this->resizeWindowAnimation->setDuration(400);
+	this->resizeWindowAnimation->setEasingCurve(QEasingCurve::InOutSine);
+
+	connect(this->systemNotification, &SystemNotification::updateFriendList, this->friend_page, &FriendPage::IncreaseNewUserItem, Qt::DirectConnection);
 	connect(this->systemNotification_Animation, &QTimeLine::frameChanged, this, &Ornament::SystemNotificationAnimationFrameChanged, Qt::DirectConnection);
 	connect(this->systemNotification_Animation, &QTimeLine::finished, this, [=]() {
 		if (this->systemNotification_Animation->direction() == QTimeLine::Backward)
@@ -77,10 +83,21 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 		});
 
 	connect(this->friend_page, &FriendPage::itemChanged, this->chat_page, &ChatPage::itemChanged, Qt::DirectConnection);
+	connect(this->chat_page, &ChatPage::resizeMainWindowSize, this, [=](bool isShow) {
+		if (isShow) {
+			this->resizeWindowAnimation->stop();
+			this->resizeWindowAnimation->setDirection(QPropertyAnimation::Forward);
+			this->resizeWindowAnimation->setStartValue(QSize(this->width(), this->height()));
+			this->resizeWindowAnimation->setEndValue(QSize(this->width() + 200, this->height()));
+			this->resizeWindowAnimation->start();
+		}
+		else {
+			this->resizeWindowAnimation->stop();
+			this->resizeWindowAnimation->setDirection(QPropertyAnimation::Backward);
+			this->resizeWindowAnimation->start();
+		}
+		});
 
-	SystemTrayIconNotification::getInstence();
-
-	//连接服务器
 	this->chat_thread = new  QThread;
 	this->chat_network_manager = new ChatNetworkManager;
 	this->chat_network_manager->moveToThread(this->chat_thread);
@@ -94,6 +111,8 @@ Ornament::Ornament(const QPixmap& userhead_pixmap, const QByteArray& imagebytes,
 	connect(this->chat_page, &ChatPage::SendUserMessage, this->chat_network_manager, &ChatNetworkManager::sendUserNormalMessage, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::acceptUserNormalMessage, this, &Ornament::dealAcceptUserNormalMessage, Qt::QueuedConnection);
 	connect(this->chat_network_manager, &ChatNetworkManager::userDisconnectedSignal, this, &Ornament::dealUserDisconnected, Qt::QueuedConnection);
+
+	SystemTrayIconNotification::getInstence();
 }
 
 Ornament::~Ornament()
@@ -137,6 +156,7 @@ void Ornament::startFileServiceThread()
 	connect(this->file_work, &FileWork::updateUploadFileProgressSignal, this, &Ornament::updateUploadingFileProgress, Qt::QueuedConnection);
 	connect(this->file_work, &FileWork::ReceiveFileSignal, this, &Ornament::dealReceiveFileForServer, Qt::QueuedConnection);
 	connect(this->file_work, &FileWork::updateDownloadFileProgressSignal, this, &Ornament::updateDownloadFileProgress, Qt::QueuedConnection);
+	connect(this->file_work, &FileWork::finishedForImage, this, &Ornament::dealReceiveFileForImage, Qt::QueuedConnection);
 }
 
 void Ornament::deleteChatThread()
@@ -164,7 +184,6 @@ void Ornament::deleteChatThread()
 			this->file_work->deleteLater();
 			this->file_work = Q_NULLPTR;
 
-			this->filework_thread->requestInterruption();
 			this->filework_thread->exit(0);
 			this->filework_thread->wait();
 			this->filework_thread->deleteLater();
@@ -244,7 +263,7 @@ void Ornament::dealAcceptUserNormalMessage(const QString& senderUserAccount, con
 	user_data.alignment = Qt::AlignLeft;
 	user_data.messageType = ChatMessageType::TEXT;
 	this->chat_page->CreateChatWindow(user_data);
-	QPixmap pixmap = user_data.userHead;
+	QPixmap pixmap = user_data.userHead.scaled(QSize(100, 100) * GLOB_ScaleDpi, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 	SystemTrayIconNotification::getInstence()->showMessage(user_data.userName, message, pixmap);
 }
 
@@ -255,22 +274,25 @@ void Ornament::dealUserDisconnected(const QString& userAccount)
 
 void Ornament::dealReceiveFileForServer(const QString senderAccount, const QString fileName, const qint64 fileSize)
 {
-	UserData user_data = this->friend_page->getUserData(senderAccount);
 	QString suffix = fileName.right(3);
+
+	if (suffix == "jpg" || suffix == "png")
+		return;
+	UserData user_data = this->friend_page->getUserData(senderAccount);
 	if (suffix == "exe")
 		user_data.fileInfo.FileType = FILETYPE::EXE;
-
 	if (suffix == "mp3")
 		user_data.fileInfo.FileType = FILETYPE::MUSIC;
 
+	user_data.fileInfo.isDownloading = true;
 	user_data.fileInfo.fileName = fileName;
 	user_data.fileInfo.fileSize = QString::number(fileSize * 1.0 * OneByteForMB, 'f', 2) + "MB";
 	user_data.alignment = Qt::AlignLeft;
 	user_data.messageType = ChatMessageType::USERFILE;
-	user_data.fileInfo.isDownloading = true;
+
 	this->chat_page->CreateChatWindow(user_data);
 	QString message = QString("[文件]") + fileName;
-	QPixmap pixmap = user_data.userHead;
+	QPixmap pixmap = user_data.userHead.scaled(QSize(100, 100) * GLOB_ScaleDpi, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 	SystemTrayIconNotification::getInstence()->showMessage(user_data.userName, message, pixmap);
 }
 
@@ -284,6 +306,28 @@ void Ornament::updateDownloadFileProgress(const qreal& pos)
 	this->chat_page->updateDownloadFileProgress(pos);
 }
 
+void Ornament::dealReceiveFileForImage(const QString& senderUser, const QString& fileName, const QString& fileSize)
+{
+	QString suffix = fileName.right(3);
+	if (suffix == "jpg" || suffix == "png")
+	{
+		UserData user_data = this->friend_page->getUserData(senderUser);
+		user_data.fileInfo.FileType = FILETYPE::PHOTO;
+		user_data.fileInfo.filePath = QApplication::applicationDirPath() + "/" + fileName;
+
+		user_data.fileInfo.fileName = fileName;
+		user_data.fileInfo.fileSize = QString::number(fileSize.toLongLong() * 1.0 * OneByteForMB, 'f', 2) + "MB";
+		user_data.alignment = Qt::AlignLeft;
+		user_data.messageType = ChatMessageType::USERFILE;
+
+		this->chat_page->CreateChatWindow(user_data);
+		QString message = QString("[文件]") + fileName;
+		QPixmap pixmap = user_data.userHead.scaled(QSize(100, 100) * GLOB_ScaleDpi, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+		SystemTrayIconNotification::getInstence()->showMessage(user_data.userName, message, pixmap);
+	}
+}
+
+
 void Ornament::mousePressEvent(QMouseEvent* event)
 {
 	if (this->systemNotification_Animation->state() == QTimeLine::Running)
@@ -295,4 +339,14 @@ void Ornament::mousePressEvent(QMouseEvent* event)
 	}
 
 	QWidget::mousePressEvent(event);
+}
+
+void Ornament::changeEvent(QEvent* event)
+{
+	if (event->type() == QEvent::WindowStateChange) {
+		if (!this->tool->isHidden())
+			this->tool->hide();
+		if (this->tool->isHidden())
+			emit this->ToolStateSignal(false);
+	}
 }

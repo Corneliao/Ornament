@@ -173,7 +173,7 @@ void FranelessWindowForDialog::setResieable(bool resizeable)
 		const LONG style = (WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CLIPCHILDREN);
 		SetWindowLongPtr(hwnd, GWL_STYLE, style);
 
-		const MARGINS shadow = { 1, 1, 1, 1 };
+		const MARGINS shadow = { -1, -1, -1, -1 };
 		DwmExtendFrameIntoClientArea(hwnd, &shadow);
 
 		SetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);

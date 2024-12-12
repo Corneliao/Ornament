@@ -5,21 +5,30 @@ ChatWindow::ChatWindow(const UserData& user_data, QWidget* parent)
 {
 	this->m_userData = user_data;
 	this->currentChatWindowIndex = user_data.index;
-	QVBoxLayout* main_vbox = new QVBoxLayout(this);
+
+	QHBoxLayout* main_lay = new QHBoxLayout(this);
+	main_lay->setContentsMargins(0, 0, 0, 0);
+	this->setLayout(main_lay);
+
+	QVBoxLayout* main_vbox = new QVBoxLayout();
 	//main_vbox->setContentsMargins(0, 0, 0, 0);
-	this->setLayout(main_vbox);
+
+
+	//QPalette pale;
+	//pale.setColor(QPalette::ColorGroup::Active,QPalette::Window, Qt::transparent);
 
 	this->chat_title = new ChatTitle(user_data.userName, user_data.userHead, this);
-	QPalette pale;
-	pale.setColor(QPalette::Window, Qt::transparent);
-
 	this->chat_list = new QListWidget(this);
 	this->chat_list->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 	this->chat_list->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	this->chat_list->setStyleSheet("QListWidget::item:hover{background:transparent};");
+	QStringList qss;
+	qss.append("QListWidget::item:hover{background:transparent}");
+	qss.append("QListWidget{background-color:transparent}");
+	this->chat_list->setStyleSheet(qss.join(""));
+
 	chat_list->setSpacing(5);
 	this->chat_list->setFrameShape(QFrame::NoFrame);
-	this->chat_list->setPalette(pale);
+	//this->chat_list->setPalette(pale);
 
 	this->message_edit = new ChatMessageEdit(this);
 
@@ -27,8 +36,22 @@ ChatWindow::ChatWindow(const UserData& user_data, QWidget* parent)
 	main_vbox->addWidget(this->chat_list);
 	main_vbox->addWidget(this->message_edit);
 
+	main_lay->addLayout(main_vbox);
+
+	this->file_list = new FileQueueList(this);
+	this->file_list->hide();
+
+	main_lay->addWidget(this->file_list);
+
 	connect(this->message_edit, &ChatMessageEdit::SendUserMessage, this, &ChatWindow::dealUserSendMessage, Qt::DirectConnection);
 	connect(this->message_edit, &ChatMessageEdit::MyMessageForFileSignal, this, &ChatWindow::IncreaseMessageItemForEXE, Qt::DirectConnection);
+	connect(this->message_edit, &ChatMessageEdit::waitingFileQueueButtonClicked, this, [=]() {
+		this->file_list->isHidden() ? this->file_list->show() : this->file_list->hide();
+		if(this->file_list->isHidden())
+			emit this->resizeMainWindowSize(false);
+		else
+			emit this->resizeMainWindowSize(true);
+		});
 }
 
 ChatWindow::~ChatWindow()
@@ -69,10 +92,8 @@ void ChatWindow::dealUserSendMessage(const QString& message)
 	emit this->modifyChatListItemData(user_data);
 
 	if (!this->m_userData.status)
-	{
-		qDebug() << "当前好友未在线";
 		return;
-	}
+	
 	emit this->SendUserMessage(QString::number(GLOB_UserAccount), this->m_userData.userAccount, message);
 }
 
@@ -91,15 +112,15 @@ void ChatWindow::IncreaseMessageItemForEXE(const FileInfoData& file_data)
 	user_data.userHead = userHead;
 	user_data.fileInfo = file_data;
 	user_data.fileInfo.fileSize = QString::number(file_data.fileSize.toLongLong() * 1.0 * OneByteForMB, 'f', 2) + "MB";
-	user_data.fileInfo.isUploading = true;
 	user_data.messageType = ChatMessageType::USERFILE;
 	user_data.index = this->m_userData.index;
 	user_data.receiverUserAccount = this->m_userData.userAccount;
-
+	user_data.fileInfo.isUploading = true;
 	this->IncreaseMessageItem(user_data);
 	emit this->modifyChatListItemData(user_data);
 	if (!this->m_userData.status)
 		return;
+
 	ReceiverFileUserAccountTemp = this->m_userData.userAccount;
 	emit this->SendUserMessageForUserFileSignal(QString::number(GLOB_UserAccount), this->m_userData.userAccount, file_data);
 }
@@ -179,7 +200,10 @@ ChatMessageEdit::ChatMessageEdit(QWidget* parent) :QWidget(parent)
 	this->setLayout(main_vbox);
 	main_vbox->setContentsMargins(0, 0, 0, 0);
 
+	QFont font;
+	font.setPixelSize(13);
 	this->message_edit = new QTextEdit(this);
+	this->message_edit->setFont(font);
 	this->message_edit->setFrameShape(QFrame::NoFrame);
 	this->message_edit->setPlaceholderText("Enter Something...");
 	this->message_edit->installEventFilter(this);
@@ -191,6 +215,7 @@ ChatMessageEdit::ChatMessageEdit(QWidget* parent) :QWidget(parent)
 	this->file_button->setFixedSize(23, 23);
 	this->file_button->setScaledContents(true);
 	QPixmap pixmap(":/Resource/ico/file_unsel.png");
+	pixmap.setDevicePixelRatio(GLOB_ScaleDpi);
 	this->file_button->setPixmap(pixmap);
 	this->file_button->setCursor(Qt::PointingHandCursor);
 	this->file_button->setAttribute(Qt::WA_Hover);
@@ -205,12 +230,22 @@ ChatMessageEdit::ChatMessageEdit(QWidget* parent) :QWidget(parent)
 	this->emoji_button->setAttribute(Qt::WA_Hover);
 	this->emoji_button->installEventFilter(this);
 
+	this->waitTransferFile_button = new  QLabel(this);
+	this->waitTransferFile_button->setFixedSize(25, 25);
+	this->waitTransferFile_button->setScaledContents(true);
+	pixmap.load(":/Resource/ico/wait_trans_unsel.png");
+	this->waitTransferFile_button->setPixmap(pixmap);
+	this->waitTransferFile_button->setAttribute(Qt::WA_Hover);
+	this->waitTransferFile_button->installEventFilter(this);
+	this->waitTransferFile_button->setCursor(Qt::PointingHandCursor);
+
 	this->send_button = new SendMessageButton(this);
 
 	lay->setSpacing(15);
 	lay->addWidget(this->file_button);
 	lay->addWidget(this->emoji_button);
 	lay->addStretch();
+	lay->addWidget(this->waitTransferFile_button);
 	lay->addWidget(this->send_button);
 	main_vbox->addSpacing(5);
 	main_vbox->addWidget(this->message_edit);
@@ -263,7 +298,8 @@ bool ChatMessageEdit::eventFilter(QObject* target, QEvent* event)
 					data.FileType = FILETYPE::EXE;
 				else if (info.suffix() == "mp3")
 					data.FileType = FILETYPE::MUSIC;
-
+				else if (info.suffix() == "png" || info.suffix() == "jpg")
+					data.FileType = FILETYPE::PHOTO;
 				QString fileName = info.fileName();
 				data.fileName = fileName;
 				data.fileSize = QString::number(info.size());
@@ -282,6 +318,22 @@ bool ChatMessageEdit::eventFilter(QObject* target, QEvent* event)
 		if (event->type() == QEvent::HoverLeave) {
 			pixmap.load(":/Resource/ico/emoji_unsel.png");
 			this->emoji_button->setPixmap(pixmap);
+			return true;
+		}
+	}
+	if (target == this->waitTransferFile_button) {
+		if (event->type() == QEvent::HoverEnter) {
+			pixmap.load(":/Resource/ico/wait_trans_sel.png");
+			this->waitTransferFile_button->setPixmap(pixmap);
+			return true;
+		}
+		if (event->type() == QEvent::HoverLeave) {
+			pixmap.load(":/Resource/ico/wait_trans_unsel.png");
+			this->waitTransferFile_button->setPixmap(pixmap);
+			return true;
+		}
+		if (event->type() == QEvent::MouseButtonPress) {
+			emit this->waitingFileQueueButtonClicked();
 			return true;
 		}
 	}

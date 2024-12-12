@@ -9,6 +9,7 @@
 #include <QResizeEvent>
 #include <QApplication>
 #include <QTimeLine>
+#include <QPropertyAnimation>
 #include "../Component/include/SystemNotification.h"
 #include "../FramelessWindow/include/framelesswindow.h"
 #include "../UserDataManager/include/UserDatabaseManager.h"
@@ -32,6 +33,7 @@ protected:
 	void resizeEvent(QResizeEvent* event)Q_DECL_OVERRIDE;
 	bool eventFilter(QObject* target, QEvent* event)Q_DECL_OVERRIDE;
 	void mousePressEvent(QMouseEvent* event)Q_DECL_OVERRIDE;
+	void changeEvent(QEvent* event)Q_DECL_OVERRIDE;
 private:
 	void startSqlThread();
 	void startFileServiceThread();
@@ -46,6 +48,8 @@ private:
 	void dealReceiveFileForServer(const QString senderAccount, const QString fileName, const qint64 fileSize);
 	void updateUploadingFileProgress(const qreal& pos);
 	void updateDownloadFileProgress(const qreal& pos);
+	void dealReceiveFileForImage(const QString& senderUser, const QString& fileName, const QString& fileSize);
+	void dealSendUserMessageForFile(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data);
 private:
 	ApplicationTitleBar* application_title_Bar = Q_NULLPTR;
 	ApplicationFeaureBar* application_feature_Bar = Q_NULLPTR;
@@ -63,6 +67,7 @@ private:
 	QTimeLine* systemNotification_Animation = Q_NULLPTR;
 	QThread* filework_thread = Q_NULLPTR;
 	FileWork* file_work = Q_NULLPTR;
+	QPropertyAnimation* resizeWindowAnimation = Q_NULLPTR;
 
 signals:
 	void ToolStateSignal(bool isShow);

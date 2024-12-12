@@ -43,11 +43,12 @@ void FriendList::initializeFriends(const QList<UserData> datas)
 {
 	for (const UserData data : datas)
 		this->increaseUserFriendItem(data);
+	this->friend_list->sortItems(Qt::DescendingOrder);
 }
 
 void FriendList::increaseUserFriendItem(const UserData& user_data)
 {
-	QListWidgetItem* item = new QListWidgetItem(this->friend_list);
+	MyListWidgetItem* item = new MyListWidgetItem(this->friend_list);
 	item->setData(Qt::UserRole, QVariant::fromValue(user_data));
 	this->friend_list->addItem(item);
 }
@@ -95,6 +96,7 @@ void FriendList::dealItemChanged(QListWidgetItem* item)
 {
 	UserData  user_data = item->data(Qt::UserRole).value<UserData>();
 	emit this->ItemChanged(user_data);
+	this->friend_list->sortItems(Qt::DescendingOrder);
 }
 
 void FriendList::setUserDataForDisconnected(const QString& userAccount)
@@ -118,7 +120,24 @@ void FriendList::paintEvent(QPaintEvent*)
 	QPainter painter(this);
 	painter.setRenderHint(QPainter::Antialiasing);
 	painter.setPen(Qt::NoPen);
-	//painter.setBrush(QColor(220, 220, 220, 55));
 	painter.setBrush(Qt::transparent);
 	painter.drawRoundedRect(this->rect(), 15, 15);
+}
+
+MyListWidgetItem::MyListWidgetItem(QListWidget* parent) :QListWidgetItem(parent)
+{
+}
+
+bool MyListWidgetItem::operator<(const QListWidgetItem& other) const
+{
+	UserData m_user_data = this->data(Qt::UserRole).value<UserData>();
+	UserData other_data = other.data(Qt::UserRole).value<UserData>();
+	if (&other) {
+		if (m_user_data.status != other_data.status)
+			return m_user_data.status < other_data.status;
+		else
+			return m_user_data.userName < other_data.userAccount;
+	}
+
+	return QListWidgetItem::operator<(other);
 }

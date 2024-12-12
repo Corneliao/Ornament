@@ -20,7 +20,7 @@ enum  NoticeType { UserApplication };
 enum USERDATATYPE { UserApplicationData = 0, UpdateUserFriend };
 
 enum ChatMessageType { TEXT, USERFILE };
-enum FILETYPE { EXE, MUSIC };
+enum FILETYPE { EXE, MUSIC, PHOTO };
 
 struct FeatureBarData {
 	QPixmap normal_ico;
@@ -68,3 +68,11 @@ struct FILETASKQUEUE {
 	QString receiverUser;
 	FileInfoData fileInfo;
 };
+
+struct FILEQUEUEITEMDATA {
+	QPixmap m_file_ico;
+	QString m_fileName;
+	QString m_fileSize;
+	FileInfoData FileInfo;
+};
+Q_DECLARE_METATYPE(FileInfoData);

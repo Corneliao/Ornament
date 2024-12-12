@@ -9,3 +9,13 @@
 #define signals
 #define Q_SIGNALS public QT_ANNOTATE_ACCESS_SPECIFIER(qt_signal)
 #define Q_SIGNALS
+#define QT_BEGIN_NAMESPACE
+#define QT_BEGIN_NAMESPACE inline namespace QT_NAMESPACE {
+#define QT_BEGIN_NAMESPACE namespace QT_NAMESPACE {
+#define QT_END_NAMESPACE
+#define QT_END_NAMESPACE }
+#define Q_INVOKABLE QT_ANNOTATE_FUNCTION(qt_invokable)
+#define Q_INVOKABLE
+#define Q_SLOTS QT_ANNOTATE_ACCESS_SPECIFIER(qt_slot)
+#define Q_SLOTS
+#define slots

@@ -17,7 +17,10 @@ public:
 
 public:
 	void initializeFileSocket();
-	bool currentStatus()const;
+	bool currentUploadStatus()const;
+	bool currentReceiveStatus()const;
+
+public slots:
 	void SendFileInfo(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data);
 private:
 	void ReadData();
@@ -37,11 +40,12 @@ private:
 	bool isReceiveingFile = false;
 	qint64 alreadyReceivedBytes = 0;
 	qreal m_position = 0.0;
-	QMutex m_mutex;
 	QQueue<FILETASKQUEUE> FILETASKS;
 Q_SIGNALS:
 	void updateUploadFileProgressSignal(const qreal& pos);
 	void updateDownloadFileProgressSignal(const qreal& pos);
 	void ReceiveFileSignal(const QString& senderAccount, const QString& fileName, const qint64& fileSize);
 	void completeReceivedFile();
+	void finishedForImage(const QString& senderAccount, const QString& fileName, const QString& fileSize);
+	void addFileTaskSignal(const QString& fileName, const QString& fileSize);
 };

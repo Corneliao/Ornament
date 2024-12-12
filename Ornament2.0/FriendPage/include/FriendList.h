@@ -10,6 +10,11 @@
 #include "../../StyledItemDelegate/include/FriendListDelegate.h"
 #include "../../global.h"
 #include "../../Component/include/SystemTrayIconNotification.h"
+
+QT_BEGIN_NAMESPACE
+class MyListWidgetItem;
+QT_END_NAMESPACE
+
 class FriendList : public QWidget
 {
 	Q_OBJECT
@@ -24,7 +29,7 @@ public:
 	UserData getUserData(const QString& userAccount)const;
 	void dealItemClicked(QListWidgetItem* item);
 	void dealItemChanged(QListWidgetItem* item);
-	void setUserDataForDisconnected(const  QString &  userAccount);
+	void setUserDataForDisconnected(const  QString& userAccount);
 protected:
 	void paintEvent(QPaintEvent*)Q_DECL_OVERRIDE;
 private:
@@ -33,4 +38,12 @@ private:
 signals:
 	void createChatWindowSignal(UserData& user_data);
 	void ItemChanged(UserData& user_data);
+};
+
+class MyListWidgetItem :public QListWidgetItem {
+public:
+	explicit MyListWidgetItem(QListWidget* parent = Q_NULLPTR);
+protected:
+	bool operator<(const QListWidgetItem& other)const override;
+private:
 };

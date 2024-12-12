@@ -14,6 +14,7 @@ void ChatNetworkManager::initializeSocket()
 {
 	DEBUGINFO << "客户端线程：" << QThread::currentThreadId();
 	this->socket = new QTcpSocket(this);
+	this->socket->setSocketOption(QAbstractSocket::KeepAliveOption, true);
 	//this->socket->connectToHost(QHostAddress("120.46.157.203"), quint16(7502));
 	this->socket->connectToHost(QHostAddress("127.0.0.1"), quint16(7502));
 
@@ -22,7 +23,6 @@ void ChatNetworkManager::initializeSocket()
 		qDebug() << this->socket->errorString();
 		return;
 	}
-
 
 	GLOB_IsConnectedServer = true;
 	connect(this->socket, &QTcpSocket::readyRead, this, &ChatNetworkManager::ReadData, Qt::DirectConnection);
