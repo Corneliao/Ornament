@@ -327,7 +327,6 @@ void Ornament::dealReceiveFileForImage(const QString& senderUser, const QString&
 	}
 }
 
-
 void Ornament::mousePressEvent(QMouseEvent* event)
 {
 	if (this->systemNotification_Animation->state() == QTimeLine::Running)

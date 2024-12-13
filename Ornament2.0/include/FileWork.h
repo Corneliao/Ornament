@@ -40,6 +40,7 @@ private:
 	bool isReceiveingFile = false;
 	qint64 alreadyReceivedBytes = 0;
 	qreal m_position = 0.0;
+	QMutex m_mutex;
 	QQueue<FILETASKQUEUE> FILETASKS;
 Q_SIGNALS:
 	void updateUploadFileProgressSignal(const qreal& pos);

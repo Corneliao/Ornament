@@ -16,6 +16,7 @@
 #include <QDateTime>
 #include <QGraphicsDropShadowEffect>
 #include  "../../FramelessWindow/include/framelesswindow.h"
+#include "../../Component/include/ImageViewer.h"
 #include "../../global.h"
 
 QT_BEGIN_NAMESPACE
@@ -44,17 +45,21 @@ private:
 	Bubble* bubble = Q_NULLPTR;
 	QTimer* hoverTimer = Q_NULLPTR;
 	QLabel* send_time = Q_NULLPTR;
+Q_SIGNALS:
+	void showImageViewer(const QString& image_path);
 };
 class Bubble :public QWidget {
 	Q_OBJECT
 public:
 	explicit Bubble(const UserData& user_data, QWidget* parent = Q_NULLPTR);
+	~Bubble();
 	void setSliderPosition(const qreal& position);
 	void setStatus(const QString& text);
 	QString imagePath()const;
 protected:
 	void paintEvent(QPaintEvent* event)Q_DECL_OVERRIDE;
 	void showEvent(QShowEvent* event)Q_DECL_OVERRIDE;
+	void mouseDoubleClickEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
 private:
 	QLabel* text = Q_NULLPTR;
 	QLabel* fileIco = Q_NULLPTR;
@@ -65,6 +70,8 @@ private:
 	QRect border_rect;
 	ImageContainer* image = Q_NULLPTR;
 	UserData user_data;
+Q_SIGNALS:
+	void showImageViewer(const QString& image_path);
 };
 
 class ProgressSlider :public QWidget {
@@ -90,5 +97,4 @@ private:
 	QString path;
 	QLabel* image = Q_NULLPTR;
 	QPixmap pixmap;
-
 };

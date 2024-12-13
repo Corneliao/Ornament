@@ -13,7 +13,6 @@ ChatWindow::ChatWindow(const UserData& user_data, QWidget* parent)
 	QVBoxLayout* main_vbox = new QVBoxLayout();
 	//main_vbox->setContentsMargins(0, 0, 0, 0);
 
-
 	//QPalette pale;
 	//pale.setColor(QPalette::ColorGroup::Active,QPalette::Window, Qt::transparent);
 
@@ -47,7 +46,7 @@ ChatWindow::ChatWindow(const UserData& user_data, QWidget* parent)
 	connect(this->message_edit, &ChatMessageEdit::MyMessageForFileSignal, this, &ChatWindow::IncreaseMessageItemForEXE, Qt::DirectConnection);
 	connect(this->message_edit, &ChatMessageEdit::waitingFileQueueButtonClicked, this, [=]() {
 		this->file_list->isHidden() ? this->file_list->show() : this->file_list->hide();
-		if(this->file_list->isHidden())
+		if (this->file_list->isHidden())
 			emit this->resizeMainWindowSize(false);
 		else
 			emit this->resizeMainWindowSize(true);
@@ -56,6 +55,10 @@ ChatWindow::ChatWindow(const UserData& user_data, QWidget* parent)
 
 ChatWindow::~ChatWindow()
 {
+	if (this->image_viewer) {
+		this->image_viewer->deleteLater();
+		this->image_viewer = Q_NULLPTR;
+	}
 }
 
 UserData ChatWindow::currentUserData() const
@@ -73,6 +76,18 @@ void ChatWindow::IncreaseMessageItem(const UserData& user_data)
 	this->chat_list->addItem(item);
 	this->chat_list->setItemWidget(item, itemWidget);
 	this->chat_list->scrollToBottom();
+
+	connect(itemWidget, &MessageItemWidget::showImageViewer, this, [=](const QString& image_path) {
+		if (this->image_viewer != Q_NULLPTR) {
+			this->image_viewer->setPixmap(image_path);
+			this->image_viewer->raise();
+			this->image_viewer->show();
+			return;
+		}
+
+		this->image_viewer = new ImageViewer(image_path, Q_NULLPTR);
+		this->image_viewer->show();
+		});
 }
 
 void ChatWindow::dealUserSendMessage(const QString& message)
@@ -93,7 +108,7 @@ void ChatWindow::dealUserSendMessage(const QString& message)
 
 	if (!this->m_userData.status)
 		return;
-	
+
 	emit this->SendUserMessage(QString::number(GLOB_UserAccount), this->m_userData.userAccount, message);
 }
 

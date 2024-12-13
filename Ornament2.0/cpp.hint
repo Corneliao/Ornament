@@ -19,3 +19,7 @@
 #define Q_SLOTS QT_ANNOTATE_ACCESS_SPECIFIER(qt_slot)
 #define Q_SLOTS
 #define slots
+#define QT_FORWARD_DECLARE_CLASS(name)
+#define QT_FORWARD_DECLARE_CLASS(name) QT_BEGIN_NAMESPACE class name; QT_END_NAMESPACE using QT_PREPEND_NAMESPACE(name);
+#define Q_PROPERTY(__VA_ARGS__) QT_ANNOTATE_CLASS(qt_property, __VA_ARGS__)
+#define Q_PROPERTY(text) Q_PROPERTY(text)

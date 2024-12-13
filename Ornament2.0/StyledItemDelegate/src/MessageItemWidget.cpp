@@ -59,7 +59,8 @@ MessageItemWidget::MessageItemWidget(const UserData& userdata, QWidget* parent)
 	this->hoverTimer = new QTimer(this);
 	this->hoverTimer->setInterval(1000);
 	this->hoverTimer->setSingleShot(true);
-	connect(this->hoverTimer, &QTimer::timeout, this->send_time, &QLabel::show,Qt::DirectConnection);
+	connect(this->hoverTimer, &QTimer::timeout, this->send_time, &QLabel::show, Qt::DirectConnection);
+	connect(this->bubble, &Bubble::showImageViewer, this, &MessageItemWidget::showImageViewer, Qt::DirectConnection);
 	this->adjustSize();
 }
 
@@ -87,7 +88,7 @@ void MessageItemWidget::setSliderPosition(const qreal& position)
 	}
 }
 
-void MessageItemWidget::paintEvent(QPaintEvent*event)
+void MessageItemWidget::paintEvent(QPaintEvent* event)
 {
 	QWidget::paintEvent(event);
 }
@@ -197,6 +198,10 @@ Bubble::Bubble(const UserData& user_data, QWidget* parent) :QWidget(parent)
 	}
 }
 
+Bubble::~Bubble()
+{
+}
+
 void Bubble::setSliderPosition(const qreal& position)
 {
 	if (this->slider)
@@ -232,6 +237,13 @@ void Bubble::showEvent(QShowEvent* event)
 	this->border_rect = this->rect().adjusted(2, 2, -2, -2);
 	this->update();
 	QWidget::showEvent(event);
+}
+
+void Bubble::mouseDoubleClickEvent(QMouseEvent* event)
+{
+	if (this->user_data.fileInfo.FileType == FILETYPE::PHOTO)
+		emit this->showImageViewer(this->user_data.fileInfo.filePath);
+	QWidget::mouseDoubleClickEvent(event);
 }
 
 ProgressSlider::ProgressSlider(QWidget* parent) :QWidget(parent)
@@ -286,7 +298,7 @@ void ImageContainer::paintEvent(QPaintEvent* event)
 	painter.setRenderHints(QPainter::Antialiasing, true);
 	painter.setRenderHints(QPainter::SmoothPixmapTransform, true);
 	QPainterPath path;
-	path.addRoundedRect(this->rect(), 8.0f, 8.0f, Qt::AbsoluteSize);
+	path.addRoundedRect(this->rect(), 8.5f, 8.5f, Qt::AbsoluteSize);
 	painter.setClipPath(path);
 	painter.setPen(Qt::NoPen);
 	painter.setBrush(Qt::NoBrush);

@@ -20,6 +20,7 @@
 #include "../../Component/include/RoundImage.h"
 #include "../../Component/include/smoothlistwidget.h"
 #include "../../StyledItemDelegate/include/MessageItemWidget.h"
+#include "../../Component/include/ImageViewer.h"
 #include "FileQueueList.h"
 class ChatTitle;
 class ChatMessageEdit;
@@ -45,6 +46,7 @@ private:
 	QListWidget* chat_list = Q_NULLPTR;
 	ChatMessageEdit* message_edit = Q_NULLPTR;
 	FileQueueList* file_list = Q_NULLPTR;
+	ImageViewer* image_viewer = Q_NULLPTR;
 signals:
 	void SendUserMessage(const QString& senderUserAccount, const QString& receiverUserAccount, const QString& message);
 	void SendUserMessageForUserFileSignal(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data);

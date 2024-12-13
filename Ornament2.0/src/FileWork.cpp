@@ -33,16 +33,16 @@ void FileWork::initializeFileSocket()
 
 void FileWork::SendFileInfo(const QString& senderUserAccount, const QString& receiverUserAccount, const FileInfoData& file_data)
 {
-	//if (this->isReceiveingFile) {
-	//	qDebug() << "当前正在接受文件,已加入队列";
-	//	FILETASKQUEUE task;
-	//	task.senderUser = senderUserAccount;
-	//	task.receiverUser = receiverUserAccount;
-	//	task.fileInfo = file_data;
-	//	this->FILETASKS.enqueue(task);
-	//	return;
-	//}
-	//QMutexLocker locker(&this->m_mutex);
+	if (this->isReceiveingFile) {
+		qDebug() << "当前正在接受文件,已加入队列";
+		FILETASKQUEUE task;
+		task.senderUser = senderUserAccount;
+		task.receiverUser = receiverUserAccount;
+		task.fileInfo = file_data;
+		this->FILETASKS.enqueue(task);
+		return;
+	}
+	QMutexLocker locker(&this->m_mutex);
 	DEBUGINFO << "文件信息：" << file_data.fileName << file_data.fileSize << "发送者：" << senderUserAccount << "接收者：" << receiverUserAccount;
 	this->m_filePath_temp = file_data.filePath;
 	this->m_fileTotalSize_temp = file_data.fileSize.toLongLong();
@@ -99,8 +99,6 @@ bool FileWork::currentUploadStatus() const
 bool FileWork::currentReceiveStatus()const {
 	return this->isReceiveingFile;
 }
-
-
 
 void FileWork::ReadData()
 {
