@@ -111,21 +111,22 @@ void QuickFramelessWindow::adjustResizeContentMargins(bool isMaximized) {
     qreal pixel_ratio = this->devicePixelRatio();
     QQuickItem *content_item = this->contentItem();
     QQuickItem *mainlayout_item = content_item->childItems().first();
-
-
-    if (isMaximized) {
-        QMetaObject::invokeMethod(mainlayout_item, "adjustResizeConentMargins",
-                                  Q_ARG(QVariant, static_cast<int>(frame.left / pixel_ratio)),
-                                  Q_ARG(QVariant, static_cast<int>(frame.top / pixel_ratio)),
-                                  Q_ARG(QVariant, static_cast<int>(frame.right / pixel_ratio)),
-                                  Q_ARG(QVariant, static_cast<int>(frame.bottom / pixel_ratio)));
-    } else {
-        QMetaObject::invokeMethod(mainlayout_item, "adjustResizeConentMargins",
-                                  Q_ARG(QVariant, 0),
-                                  Q_ARG(QVariant, 0),
-                                  Q_ARG(QVariant, 0),
-                                  Q_ARG(QVariant, 0));
+    if (mainlayout_item) {
+        if (isMaximized) {
+            QMetaObject::invokeMethod(mainlayout_item, "adjustResizeConentMargins",
+                                      Q_ARG(QVariant, static_cast<int>(frame.left / pixel_ratio)),
+                                      Q_ARG(QVariant, static_cast<int>(frame.top / pixel_ratio)),
+                                      Q_ARG(QVariant, static_cast<int>(frame.right / pixel_ratio)),
+                                      Q_ARG(QVariant, static_cast<int>(frame.bottom / pixel_ratio)));
+        } else {
+            QMetaObject::invokeMethod(mainlayout_item, "adjustResizeConentMargins",
+                                      Q_ARG(QVariant, 0),
+                                      Q_ARG(QVariant, 0),
+                                      Q_ARG(QVariant, 0),
+                                      Q_ARG(QVariant, 0));
+        }
     }
+
 
 }
 
@@ -141,15 +142,17 @@ int QuickFramelessWindow::dealWindowTitleBar(const int &x, const int &y) {
     if (!this->m_titleBar)
         return 0;
     qreal dpr = this->devicePixelRatio();
-    QPointF pos = this->mapFromGlobal(QPointF(x * 1.0 / dpr, y * 1.0 / dpr));
-    if (!this->m_titleBar->contains(pos))return false;
-    QQuickItem *child = this->m_titleBar->childAt(pos.x(), pos.y());
-    if (!child) {
-        result = HTCAPTION;
-    } else {
-        if (this->whitelistItem.contains(child))
+    QPointF pos = this->m_titleBar->mapFromGlobal(QPointF(x / dpr, y / dpr));
+    if (this->m_titleBar->contains(pos)) {
+        QQuickItem *child = this->m_titleBar->childAt(pos.x(), pos.y());
+        if (!child) {
             result = HTCAPTION;
+        } else {
+            if (this->whitelistItem.contains(child))
+                result = HTCAPTION;
+        }
     }
+
     return result;
 }
 
@@ -158,5 +161,6 @@ void QuickFramelessWindow::addTitleWhitelist(QQuickItem *item) {
         return;
     if (!this->whitelistItem.contains(item))
         this->whitelistItem.append(item);
+    qDebug() << item->objectName();
 }
 
