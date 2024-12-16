@@ -1,0 +1,9 @@
+-rootPath
+C:/Users/Flache/CLionProjects/QuickFramelessWindow
+-cmake-output
+-output-file
+C:/Users/Flache/CLionProjects/QuickFramelessWindow/cmake-build-debug-visual-studio/.qt/qml_imports/FramelessWindow_conf.cmake
+-importPath
+C:/Users/Flache/CLionProjects/QuickFramelessWindow/cmake-build-debug-visual-studio
+-importPath
+D:/AppData/QT/6.8.1/msvc2022_64/qml
