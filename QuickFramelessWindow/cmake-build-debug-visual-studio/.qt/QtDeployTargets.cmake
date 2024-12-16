@@ -1,3 +1,0 @@
-set(__QT_DEPLOY_TARGET_FramelessWindow_FILE C:/Users/Flache/CLionProjects/QuickFramelessWindow/cmake-build-debug-visual-studio/FramelessWindow.exe)
-set(__QT_DEPLOY_TARGET_FramelessWindow_TYPE EXECUTABLE)
-set(__QT_DEPLOY_TARGET_FramelessWindow_RUNTIME_DLLS D:/AppData/QT/6.8.1/msvc2022_64/bin/Qt6Quickd.dll;D:/AppData/QT/6.8.1/msvc2022_64/bin/Qt6QmlMetad.dll;D:/AppData/QT/6.8.1/msvc2022_64/bin/Qt6QmlWorkerScriptd.dll;D:/AppData/QT/6.8.1/msvc2022_64/bin/Qt6QmlModelsd.dll;D:/AppData/QT/6.8.1/msvc2022_64/bin/Qt6Qmld.dll;D:/AppData/QT/6.8.1/msvc2022_64/bin/Qt6OpenGLd.dll;D:/AppData/QT/6.8.1/msvc2022_64/bin/Qt6Guid.dll;D:/AppData/QT/6.8.1/msvc2022_64/bin/Qt6Networkd.dll;D:/AppData/QT/6.8.1/msvc2022_64/bin/Qt6Cored.dll)

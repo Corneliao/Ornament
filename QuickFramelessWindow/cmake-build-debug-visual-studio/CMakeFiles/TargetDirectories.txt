@@ -1,6 +1,0 @@
-C:/Users/Flache/CLionProjects/QuickFramelessWindow/cmake-build-debug-visual-studio/CMakeFiles/FramelessWindow.dir
-C:/Users/Flache/CLionProjects/QuickFramelessWindow/cmake-build-debug-visual-studio/CMakeFiles/FramelessWindow_qmlimportscan.dir
-C:/Users/Flache/CLionProjects/QuickFramelessWindow/cmake-build-debug-visual-studio/CMakeFiles/edit_cache.dir
-C:/Users/Flache/CLionProjects/QuickFramelessWindow/cmake-build-debug-visual-studio/CMakeFiles/rebuild_cache.dir
-C:/Users/Flache/CLionProjects/QuickFramelessWindow/cmake-build-debug-visual-studio/CMakeFiles/FramelessWindow_autogen_timestamp_deps.dir
-C:/Users/Flache/CLionProjects/QuickFramelessWindow/cmake-build-debug-visual-studio/CMakeFiles/FramelessWindow_autogen.dir
