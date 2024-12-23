@@ -50,7 +50,8 @@ Item {
                         imageHeight:60
                         imageUrl: "D:/Doga/WallPaper/_20241120222209.jpg"
                         width: 60
-                        windowDpi:global.WindowDpi
+                        windowDpi:global.windowDpi
+                        isRoundBorder:true
                         Component.onCompleted: {
                             effect_image.image_source = imageUrl;
                         }

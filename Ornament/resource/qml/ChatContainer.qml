@@ -5,27 +5,27 @@ import QtQml.Models
 import Qt.ImageLoader
 
 Item {
-    Component.onCompleted: {
+    /**
+     * @brief 创建用户聊天窗口
+     * @param userAccount
+     * @param userName
+     * @param imageData
+     */
+    function createFriendItem(userAccount,userName,imageData) {
         list_model.append({
-            "image_source": "D:/Doga/WallPaper/b_7ee3bc45e31b578427bd985ae04f0ab9.png",
-            "username": "Doga",
-            "usermessage": "我发送了一条消息"
-        });
-        list_model.append({
-            "image_source": "D:/Doga/WallPaper/b_7ee3bc45e31b578427bd985ae04f0ab9.png",
-            "username": "Doga",
-            "usermessage": "我发送了一条消息"
-        });
-        chat_window.createObject(stack_layout, {
-            "Layout.ferredHeight": true,
-            "Layout.ferredWidth": true,
+            "imageSource":imageData,
+            "userName":userName,
+            "userAccount":userAccount,
+            "userMessage":"我发送了一条消息"
+        })
 
-        });
-        chat_window.createObject(stack_layout, {
-            "Layout.ferredHeight": true,
-            "Layout.ferredWidth": true,
-
-        });
+        chat_window.createObject(stack_layout,{
+            "Layout.fillWidth":true,
+            "Layout.fillHeight":true,
+            "userAccount":userAccount,
+            "userName":userName,
+            "userHead":imageData
+        })
     }
 
     RowLayout {
@@ -41,6 +41,8 @@ Item {
             clip: true
             model: list_model
             spacing: 10
+
+            currentIndex:-1
 
             delegate: Rectangle {
                 id: warrper
@@ -58,13 +60,15 @@ Item {
                     anchors.verticalCenter: warrper.verticalCenter
                     height: warrper.height - 10
                     width:warrper.height - 10
-                    imageUrl: image_source
                     imageWidth: warrper.height - 10
-                    radius: 20
-                    windowDpi: global.WindowDpi
+                    windowDpi: global.windowDpi
+                    imageByteArray:imageSource
                     imageHeight: warrper.height - 10
                     isRoundImage:true
+                    isFromData:true
+
                 }
+
                 Label {
                     id: user_name
 
@@ -76,7 +80,7 @@ Item {
                     font.bold: true
                     font.pixelSize: 13
                     horizontalAlignment: Text.AlignHCenter
-                    text: username
+                    text: userName
                     verticalAlignment: Text.AlignVCenter
                 }
                 Label {
@@ -86,17 +90,20 @@ Item {
                     color: "#7b8290"
                     font.pixelSize: 12
                     horizontalAlignment: Text.AlignHCenter
-                    text: usermessage
+                    text: userMessage
                     verticalAlignment: Text.AlignVCenter
                 }
+
                 MouseArea {
                     anchors.fill: parent
 
                     onClicked: {
+                        if(warrper.ListView.view.currentIndex === index)
+                            return;
                         warrper.ListView.view.currentIndex = index;
                         stack_layout.currentIndex = index + 1;
                         var item = stack_layout.children[index + 1];
-                        if (item !== null)
+                        if (item !== undefined)
                             item.startAnimation();
                     }
                 }
@@ -136,7 +143,9 @@ Item {
 
             property string bg_color
             property string name
-
+            property string userAccount
+            property string userName
+            property alias  userHead :chatwindow_userhead.imageByteArray
             function startAnimation() {
                 animation_.start();
             }
@@ -159,12 +168,41 @@ Item {
                     to: 1
                 }
             }
-            Rectangle {
-                id: rect_
+            ColumnLayout {
+                anchors.fill:parent
 
-                anchors.fill: parent
-                color :window_.bg_color.length <=0?"transparent":window_.bg_color
-                radius: 10
+                Rectangle {
+                    id: rect_
+
+                    Layout.fillWidth:true
+                    Layout.fillHeight:true
+                    color :window_.bg_color.length <=0?"transparent":window_.bg_color
+                    RowLayout {
+                        width:parent.width
+                        height:45
+                        anchors.top:parent.top
+                        ImageLoader {
+                            id:chatwindow_userhead
+                            width:40
+                            height:40
+                            imageWidth:40
+                            imageHeight:40
+                            isFromData:true
+                            isRoundImage:true
+                            windowDpi:global.windowDpi
+                        }
+                        Label  {
+                            text:window_.userName
+                            horizontalAlignment:Text.AlignHCenter
+                            verticalAlignment:Text.AlignVCenter
+                            font.pixelSize:14
+                        }
+                        Loader {
+                            Layout.fillHeight:true
+                            Layout.fillWidth:true
+                        }
+                    }
+                }
             }
         }
     }

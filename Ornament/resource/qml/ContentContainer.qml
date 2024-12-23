@@ -3,13 +3,17 @@ import QtQuick.Layouts
 import QtQuick.Controls
 
 Item {
-    id: chat_container
+    id: content_container
 
     signal setStacklayoutCurrentIndex(int index)
 
     function setFeatureCurrentIndex() {
         feature_view.currentIndex = 1;
         swipe_view.currentIndex = 0;
+    }
+
+    function createFriendItem(userAccount,userName,imageData) {
+        chat_container.createFriendItem(userAccount,userName,imageData)
     }
 
     height: parent.height
@@ -83,7 +87,7 @@ Item {
                             onClicked: {
                                 feature_view.currentIndex = index;
                                 if (index === 0)
-                                    chat_container.setStacklayoutCurrentIndex(index);
+                                    content_container.setStacklayoutCurrentIndex(index);
                                 else
                                     swipe_view.currentIndex = index - 1;
                             }
@@ -139,6 +143,7 @@ Item {
                     spacing: 20
 
                     ChatContainer {
+                        id:chat_container
                         Layout.fillHeight: true
                         Layout.fillWidth: true
                     }

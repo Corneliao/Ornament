@@ -6,12 +6,13 @@ import QtQml
 
 FramelessWindow {
     id: main_window
+    visible:true
+    objectName :"root"
 
         signal closeWindowSignal
         signal maxWindowSignal
         signal minWindowSignal
 
-    objectName :"djsak"
     //显示主页
     function setStacklayoutCurrentIndex(index) {
         stack_layout.currentIndex = index;
@@ -27,14 +28,12 @@ FramelessWindow {
     }
 
     function  closeWindow() {
-        main_window.objectName ="dsda"
+        main_window.objectName ="quit"
         Qt.quit();
     }
 
-
-
     Component.onCompleted: {
-        chat_page.setStacklayoutCurrentIndex.connect(main_window.setStacklayoutCurrentIndex);
+        content_container.setStacklayoutCurrentIndex.connect(main_window.setStacklayoutCurrentIndex);
         main_window.setTitleBar(title_bar.spacerItem);
 
         //标题按钮的操作
@@ -43,6 +42,8 @@ FramelessWindow {
         title_bar.maxWindowSignal.connect(main_window.setWindowMaxSate);
         home_page.visible = false //程序启动时启动动画
         home_page.showHomeContainer();
+
+        content_container.createFriendItem(global.userAccount,global.userName,global.userHead)
     }
 
     ColumnLayout {
@@ -51,7 +52,7 @@ FramelessWindow {
             anchors.topMargin = top_margin;
             anchors.rightMargin = right_margin;
             anchors.bottomMargin = bottom_margin;
-        }
+        } 
 
         anchors.fill: parent
         anchors.margins: 0
@@ -81,14 +82,14 @@ FramelessWindow {
                 onIsHideChanged: {
                     if (home_page.isHide) {
                         if (stack_layout.count > 1) {
-                            chat_page.setFeatureCurrentIndex();
+                            content_container.setFeatureCurrentIndex();
                             stack_layout.currentIndex = 1;
                         }
                     }
                 }
             }
             ContentContainer {
-                id: chat_page
+                id: content_container
 
                 Layout.fillHeight: true
                 Layout.fillWidth: true

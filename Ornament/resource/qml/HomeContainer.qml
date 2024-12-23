@@ -10,6 +10,7 @@ Item {
 
     property bool isHide: false
 
+
     //显示窗口
     function showHomeContainer() {
         if (home_container.visible === false || home_container.isHide) {
@@ -121,14 +122,11 @@ Item {
                         Layout.preferredHeight: 50
                         Layout.preferredWidth: 50
                         imageHeight: 50
-                        imageUrl: "D:/Doga/WallPaper/_20241201135729.jpg"
+                        imageByteArray:global.userHead
                         imageWidth: 50
-                        radius: 15
-                        windowDpi: global.WindowDpi
-                    }
-                    Loader {
-                        Layout.preferredHeight: 10
-                        Layout.preferredWidth: 10
+                        windowDpi: global.windowDpi
+                        isRoundImage:true
+                        isFromData:true
                     }
                     //image right
                     Item {
@@ -146,7 +144,7 @@ Item {
                                 font.bold: true
                                 font.pixelSize: 15
                                 renderType: Text.NativeRendering
-                                text: "Doga"
+                                text: global.userName
                             }
                             RowLayout {
                                 Layout.fillHeight: true

@@ -2,20 +2,19 @@
 // Created by Flache on 2024/12/21.
 //
 
-#include "../include/QuickFramelessView.h"
-#include <QScreen>
+#include "QuickFramelessView.h"
 #include <QGuiApplication>
+#include <QScreen>
 QuickFramelessView::QuickFramelessView(QWindow *parent) : QQuickView(parent) {
     //设置窗口为无边框
     this->m_dpi = this->devicePixelRatio();
     QScreen *screen = QGuiApplication::primaryScreen();
     this->setFlags(flags() | Qt::WindowType::Window);
-    //设置窗口风格s
+
+    //设置窗口风格
+    this->setMinimumSize(QSize(320,400));
     this->setWindowsStyle();
-    this->setVisible(true);
     this->setColor(QColor::fromString("#eff1f2"));
-    this->setMinimumSize(QSize(320,450));
-    this->setMaximumSize(QSize(320,450));
     //窗口居中
     this->setX((screen->size().width()-this->width())/2);
     this->setY((screen->size().height()-this->height())/2);
@@ -25,7 +24,7 @@ QuickFramelessView::QuickFramelessView(QWindow *parent) : QQuickView(parent) {
 void QuickFramelessView::setWindowsStyle() {
     auto hwnd = reinterpret_cast<HWND>(this->winId());
     LONG style = GetWindowLong(hwnd, GWL_STYLE);
-    SetWindowLong(hwnd, GWL_STYLE, style | WS_THICKFRAME | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
+    SetWindowLongPtr(hwnd, GWL_STYLE, style | WS_THICKFRAME | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
 
     const MARGINS shadow = {1, 1, 1, 1};
     ::DwmExtendFrameIntoClientArea(hwnd, &shadow);
@@ -35,7 +34,9 @@ bool QuickFramelessView::nativeEvent(const QByteArray &eventType, void *message,
     MSG *msg = reinterpret_cast<MSG *>(message);
     switch (msg->message) {
         case WM_NCCALCSIZE: {
-            *result = 0;
+//            *result = 0;
+//            return true;
+            *result = WVR_REDRAW;
             return true;
         }
         case WM_NCHITTEST: {
@@ -119,7 +120,7 @@ void QuickFramelessView::adjustResizeContentMargins(bool isMaximized) {
     frame.top = std::abs(frame.bottom);
     qreal pixel_ratio = this->devicePixelRatio();
     QQuickItem *content_item = this->contentItem();
-    QQuickItem *mainlayout_item = content_item->childItems().first()->childItems().first();
+    QQuickItem *mainlayout_item = content_item->childItems().at(0)->childItems().at(1);
     if (mainlayout_item) {
         if (isMaximized) {
             QMetaObject::invokeMethod(mainlayout_item, "adjustResizeConentMargins",

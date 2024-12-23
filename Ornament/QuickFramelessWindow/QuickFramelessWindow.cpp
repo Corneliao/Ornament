@@ -13,7 +13,7 @@ QuickFramelessWindow::QuickFramelessWindow(QWindow *parent) : QQuickWindow(paren
     //设置窗口风格
     this->setWindowsStyle();
     this->setMinimumSize(QSize(1075, 750));
-    this->setVisible(true);
+   // this->setVisible(true);
     this->setColor(QColor::fromString("#eff1f2"));
     this->setX((screen->size().width() - this->width()) / 2);
     this->setY((screen->size().height() - this->height()) / 2);
@@ -33,8 +33,9 @@ bool QuickFramelessWindow::nativeEvent(const QByteArray &eventType, void *messag
     MSG *msg = reinterpret_cast<MSG *>(message);
     switch (msg->message) {
         case WM_NCCALCSIZE: {
-            *result = 0;
+            *result = WVR_REDRAW;
             return true;
+
         }
         case WM_NCHITTEST: {
             int x = GET_X_LPARAM(msg->lParam);

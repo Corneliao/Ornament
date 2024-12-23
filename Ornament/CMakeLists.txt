@@ -13,14 +13,16 @@ set(CMAKE_AUTOMOC ON)
 set(dwmapi_lib "dwmapi.lib")
 
 FILE(GLOB_RECURSE HEADER_FILE ${PROJECT_SOURCE_DIR}/include/*.h)
-
 aux_source_directory(${PROJECT_SOURCE_DIR}/src SOURCE_FILE)
-find_package(Qt6 REQUIRED COMPONENTS Quick ShaderTools)
 
-qt_add_executable(${PROJECT_NAME} WIN32
+find_package(Qt6 REQUIRED COMPONENTS Quick ShaderTools Sql Network)
+
+qt_add_executable(${PROJECT_NAME}
         ${window_ico}
         QuickFramelessWindow/QuickFramelessWindow.h
         QuickFramelessWindow/QuickFramelessWindow.cpp
+        QuickFramelessWindow/QuickFramelessView.h
+        QuickFramelessWindow/QuickFramelessView.cpp
         main.cpp
         res.qrc
         ${HEADER_FILE}
@@ -28,7 +30,7 @@ qt_add_executable(${PROJECT_NAME} WIN32
 )
 
 
-target_link_libraries(Ornament PRIVATE Qt6::Quick ${dwmapi_lib})
+target_link_libraries(Ornament PRIVATE Qt6::Quick ${dwmapi_lib} Qt6::Sql Qt6::Network)
 
 include(GNUInstallDirs)
 install(TARGETS Ornament

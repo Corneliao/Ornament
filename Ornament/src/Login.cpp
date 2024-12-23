@@ -4,28 +4,61 @@
 
 #include "../include/Login.h"
 
-Login::Login(QObject *parent) : QObject(parent) {
+Login::Login(const qreal & dpi,QObject *parent) : QObject(parent) {
+
+    qRegisterMetaType<QString>("QString&");
+    qRegisterMetaType<QByteArray>("QByteArray&");
+
     this->view = new  QuickFramelessView(Q_NULLPTR);
     this->view->setSource(QUrl("qrc:/resource/qml/LoginContainer.qml"));
     this->view->show();
+    connect(this->view,&QQuickView::statusChanged,this,[=](QQuickView::Status state){
+        qDebug() <<state;
+    });
     this->rootObject = this->view->rootObject();
-    QQuickItem * title_bar = this->rootObject->childItems().first()->childItems().first();
-    if(title_bar)  {
-        qDebug() << title_bar->objectName();
+    this->setWindowDpi(dpi);
+    QQuickItem * title_bar = this->rootObject->childItems().at(1)->childItems().first();
+    if(title_bar)
         this->view->setTitleBar(title_bar);
-    }
-    connect(rootObject,SIGNAL(loginSucceed()),this,SLOT(test()),Qt::DirectConnection);
+
+    //初始化数据库线程
+    this->thread = new QThread;
+    this->userdatabase = new UserDatabaseManager;
+    this->userdatabase->moveToThread(this->thread);
+    connect(this->thread,&QThread::started,this->userdatabase,&UserDatabaseManager::initializeUserDatabase,Qt::DirectConnection);
+    this->thread->start();
+
+    connect(rootObject,SIGNAL(logining(QString,QString)),this->userdatabase,SLOT(CheckTheLoginUserInfo(QString,QString)),Qt::QueuedConnection);
+    connect(this->userdatabase,&UserDatabaseManager::UserInfoIsCorrect,this,&Login::UserLogined,Qt::QueuedConnection);
+    connect(this->rootObject,SIGNAL(userAccountChanged(QString)),this->userdatabase,SLOT(userAccountChanged(QString)),Qt::QueuedConnection);
+    connect(this->userdatabase,&UserDatabaseManager::updateUserHead,this,[=](const QString & imageData){
+        this->rootObject->setProperty("imageData",imageData);
+        this->rootObject->setProperty("roundImage",true);
+        this->rootObject->setProperty("fromImageData",true);
+    },Qt::QueuedConnection);
+
 }
 
 void Login::destoryQuickView() {
-
     this->view->close();
     this->rootObject->deleteLater();
     this->view->deleteLater();
     this->rootObject = Q_NULLPTR;
     this->view = Q_NULLPTR;
+
+    this->userdatabase->deleteLater();
+    this->thread->exit(0);
+    this->thread->wait();
+    this->thread->deleteLater();
+    this->userdatabase = Q_NULLPTR;
+    this->thread = Q_NULLPTR;
 }
-void Login::test() {
-    qDebug()  << "登录成功";
-    emit this->succeed();
+
+Login::~Login() {
+    if(this->view != Q_NULLPTR) {
+        this->destoryQuickView();
+    }
+}
+void Login::setWindowDpi(const qreal &dpi) {
+    this->rootObject->setProperty("windowDpi",dpi);
 }

@@ -12,6 +12,7 @@
 #include <dwmapi.h>
 #include <windows.h>
 #include <windowsx.h>
+
 #define RESIZE_EDGE_THREHDLE 8
 
 class QuickFramelessWindow : public QQuickWindow {
