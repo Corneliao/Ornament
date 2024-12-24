@@ -112,14 +112,20 @@ bool QuickFramelessWindow::event(QEvent *event) {
 }
 
 void QuickFramelessWindow::adjustResizeContentMargins(bool isMaximized) {
-    RECT frame = {0, 0, 0, 0};
-    ::AdjustWindowRectEx(&frame, WS_OVERLAPPEDWINDOW, FALSE, 0);
-    frame.left = std::abs(frame.left);
-    frame.top = std::abs(frame.bottom);
-    qreal pixel_ratio = this->devicePixelRatio();
+//    RECT frame = {0, 0, 0, 0};
+//    ::AdjustWindowRectEx(&frame, WS_OVERLAPPEDWINDOW, FALSE, 0);
+//    frame.left = std::abs(frame.left);
+//    frame.top = std::abs(frame.bottom);
+//    qreal pixel_ratio = this->devicePixelRatio();
     QQuickItem *content_item = this->contentItem();
     QQuickItem *mainlayout_item = content_item->childItems().first();
     if (mainlayout_item) {
+        RECT frame = {0, 0, 0, 0};
+        ::AdjustWindowRectEx(&frame, WS_OVERLAPPEDWINDOW, FALSE, 0);
+        frame.left = std::abs(frame.left);
+        frame.top = std::abs(frame.bottom);
+        qreal pixel_ratio = this->devicePixelRatio();
+
         if (isMaximized) {
             QMetaObject::invokeMethod(mainlayout_item, "adjustResizeConentMargins",
                                       Q_ARG(QVariant, static_cast<int>(frame.left / pixel_ratio)),

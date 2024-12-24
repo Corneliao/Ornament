@@ -16,7 +16,8 @@ public:
     explicit Login(const qreal & dpi,QObject * parent = Q_NULLPTR);
     ~Login() override;
     void destoryQuickView();
-    void  setWindowDpi(const qreal  &dpi);
+
+void setWindowDpi(const qreal &dpi);
 private:
     QuickFramelessView * view = Q_NULLPTR;
     QQuickItem * rootObject =Q_NULLPTR;

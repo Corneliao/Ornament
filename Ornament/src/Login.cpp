@@ -17,7 +17,7 @@ Login::Login(const qreal & dpi,QObject *parent) : QObject(parent) {
     });
     this->rootObject = this->view->rootObject();
     this->setWindowDpi(dpi);
-    QQuickItem * title_bar = this->rootObject->childItems().at(1)->childItems().first();
+    QQuickItem * title_bar = this->rootObject->childItems().at(0)->childItems().first();
     if(title_bar)
         this->view->setTitleBar(title_bar);
 
@@ -36,6 +36,7 @@ Login::Login(const qreal & dpi,QObject *parent) : QObject(parent) {
         this->rootObject->setProperty("roundImage",true);
         this->rootObject->setProperty("fromImageData",true);
     },Qt::QueuedConnection);
+    connect(this->rootObject,SIGNAL(registerAccount(QString,QString,QString)),this->userdatabase,SLOT(RegisterUserAccount(QString,QString,QString)));
 
 }
 

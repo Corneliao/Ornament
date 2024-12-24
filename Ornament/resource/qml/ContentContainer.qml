@@ -103,7 +103,8 @@ Item {
                         }
                     }
                     highlight: Rectangle {
-                        color: "#407aff"
+                        //color: "#407aff"
+                        color:"#80D0C7"
                         radius: 10
                     }
                 }

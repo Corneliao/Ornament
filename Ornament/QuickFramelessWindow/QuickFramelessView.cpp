@@ -120,7 +120,7 @@ void QuickFramelessView::adjustResizeContentMargins(bool isMaximized) {
     frame.top = std::abs(frame.bottom);
     qreal pixel_ratio = this->devicePixelRatio();
     QQuickItem *content_item = this->contentItem();
-    QQuickItem *mainlayout_item = content_item->childItems().at(0)->childItems().at(1);
+    QQuickItem *mainlayout_item = content_item->childItems().at(0)->childItems().first();
     if (mainlayout_item) {
         if (isMaximized) {
             QMetaObject::invokeMethod(mainlayout_item, "adjustResizeConentMargins",

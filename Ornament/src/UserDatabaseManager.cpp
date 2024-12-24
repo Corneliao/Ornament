@@ -99,3 +99,37 @@ void UserDatabaseManager::userAccountChanged(const QString &userAccount) {
         }
     }
 }
+void UserDatabaseManager::RegisterUserAccount(const QString &image_path, const QString &user_name, const QString &user_password) {
+    //随机生成一个账号
+    QString path =  image_path.mid(8);
+    int account =0;
+    while(true) {
+        account = QRandomGenerator::global()->bounded(100000000,111111111);
+        UserInfo info = this->isExistTheUser(QString::number(account));
+        if(info.userAccount.isEmpty()) {
+            break;
+        }
+    }
+
+    QPixmap pixmap(path);
+    QByteArray  imagebytes;
+    QBuffer buffer(&imagebytes);
+    buffer.open(QIODevice::WriteOnly);
+    pixmap.save(&buffer,"JPG");
+    QString imageBase64 = imagebytes.toBase64();
+    buffer.close();
+    QSqlDatabase db = QSqlDatabase::database(this->connectionName);
+    QSqlQuery query(db);
+    query.prepare("INSERT INTO usersinfo (userName,userAccount,userPassword,userHead,onlineStatus) VALUES(:username,:useraccount,:userpassword,:userhead,:status)");
+    query.bindValue(":username",user_name);
+    query.bindValue(":useraccount",account);
+    query.bindValue(":userpassword",user_password);
+    query.bindValue(":userhead",imageBase64);
+    query.bindValue(":status",0);
+    if(query.exec())  {
+        qDebug() <<  "注册成功";
+    }
+    else {
+        qDebug()  << query.lastError();
+    }
+}

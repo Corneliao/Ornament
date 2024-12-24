@@ -31,6 +31,7 @@ void ImageLoader::setImageUrl(QString url_) {
     this->m_imageUrl = std::move(url_);
     if (image.isNull())
         return;
+    this->update();
 }
 
 

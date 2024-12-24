@@ -18,6 +18,7 @@
         <file>resource/qml/ChatDefaultContainer.qml</file>
         <file>resource/qml/FriendContainer.qml</file>
         <file>resource/qml/LoginContainer.qml</file>
+        <file>resource/qml/ChatMessageDelegate.qml</file>
         <file>resource/ico/FluentMaximize16Regular.png</file>
         <file>resource/ico/IconamoonClose.png</file>
         <file>resource/ico/MingcuteMinimizeLine.png</file>

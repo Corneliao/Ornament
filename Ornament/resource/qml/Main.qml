@@ -42,8 +42,6 @@ FramelessWindow {
         title_bar.maxWindowSignal.connect(main_window.setWindowMaxSate);
         home_page.visible = false //程序启动时启动动画
         home_page.showHomeContainer();
-
-        content_container.createFriendItem(global.userAccount,global.userName,global.userHead)
     }
 
     ColumnLayout {

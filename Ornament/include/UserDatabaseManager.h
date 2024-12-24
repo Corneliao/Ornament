@@ -10,6 +10,9 @@
 #include <QSqlQuery>
 #include <QThread>
 #include <QSqlError>
+#include <QRandomGenerator>
+#include <QBuffer>
+#include <QPixmap>
 #include  "global.h"
 class UserDatabaseManager:public QObject {
     Q_OBJECT
@@ -35,6 +38,8 @@ public slots:
      * @param userAccount
      */
     void userAccountChanged(const QString & userAccount);
+
+    void RegisterUserAccount(const QString & image_path,const QString & user_name,const QString & user_password);
 private:
     QString connectionName;
     bool isConnectedDatabase  = false;

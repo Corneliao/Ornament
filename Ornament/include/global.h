@@ -9,7 +9,8 @@
 #include <QString>
 #include <QObject>
 #include <QDebug>
-
+#include <QFont>
+#include <QFontMetrics>
 typedef struct  {
     QString userName;
     QString userAccount;
@@ -42,6 +43,10 @@ public:
 
     void setUserAccount(const QString  & userAccount);
     [[nodiscard]] QString userAccount()const;
+
+    Q_INVOKABLE static int GetStringWidth(const QString & text);
+    Q_INVOKABLE static int GetStringHeight(const QString & text);
+
 
 
 private:

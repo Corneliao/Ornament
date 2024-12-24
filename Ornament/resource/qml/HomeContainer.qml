@@ -162,6 +162,7 @@ Item {
                                     font.pixelSize: 11
                                     renderType: Text.NativeRendering
                                     text: "永远相信美好的事情即将发生"
+                                    font.hintingPreference:Font.PreferNoHinting
                                 }
                             }
                             Loader {

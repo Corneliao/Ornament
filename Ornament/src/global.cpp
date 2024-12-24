@@ -7,14 +7,14 @@
 
 global::global() = default;
 
-void global::setWindowDpi(const qreal & dpi) {
+void global::setWindowDpi(const qreal &dpi) {
     this->m_windowDpi = dpi;
 }
 qreal global::windowDpi() const {
     return this->m_windowDpi;
 }
-void global::setUserName(const QString & user_name) {
-    this->m_userName =  user_name;
+void global::setUserName(const QString &user_name) {
+    this->m_userName = user_name;
 }
 QString global::userName() const {
     return this->m_userName;
@@ -31,4 +31,14 @@ void global::setUserAccount(const QString &userAccount) {
 }
 QString global::userAccount() const {
     return this->m_userAccount;
+}
+int global::GetStringWidth(const QString &text) {
+    QFontMetrics metrics((QFont()));
+    int width = metrics.boundingRect(text).width();
+    return width;
+}
+int global::GetStringHeight(const QString &text) {
+    QFontMetrics metrics((QFont()));
+    int height = metrics.boundingRect(text).height();
+    return height;
 }

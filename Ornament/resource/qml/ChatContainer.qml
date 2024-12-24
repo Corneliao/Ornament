@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQml.Models
 import Qt.ImageLoader
-
+import QtQml
 Item {
     /**
      * @brief 创建用户聊天窗口
@@ -12,20 +12,22 @@ Item {
      * @param imageData
      */
     function createFriendItem(userAccount,userName,imageData) {
-        list_model.append({
-            "imageSource":imageData,
-            "userName":userName,
-            "userAccount":userAccount,
-            "userMessage":"我发送了一条消息"
-        })
-
-        chat_window.createObject(stack_layout,{
-            "Layout.fillWidth":true,
-            "Layout.fillHeight":true,
-            "userAccount":userAccount,
-            "userName":userName,
-            "userHead":imageData
-        })
+        // list_model.append({
+        //     "imageSource":imageData,
+        //     "userName":userName,
+        //     "userAccount":userAccount,
+        //     "userMessage":"我发送了一条消息"
+        // })
+        //
+        //
+        //
+        // var object = chat_window.createObject(stack_layout,{
+        //     "Layout.fillWidth":true,
+        //     "Layout.fillHeight":true,
+        //     "userAccount":userAccount,
+        //     "userName":userName,
+        //     "userHead":imageData
+        // })
     }
 
     RowLayout {
@@ -145,9 +147,26 @@ Item {
             property string name
             property string userAccount
             property string userName
-            property alias  userHead :chatwindow_userhead.imageByteArray
+            property string  userHead // :chatwindow_userhead.imageByteArray
+            property string message_temptemp;
+
             function startAnimation() {
                 animation_.start();
+            }
+
+            function addUserRecvTextMessage() {
+                message_model.append({
+                    "userMessage":"我发送了一条消息",
+                    "itemDirection":"recv"
+                })
+            }
+
+            function addMySendTextMessage(text) {
+                message_model.append({
+                    "userMessage":text,
+                    "itemDirection":"send"
+                })
+                scrollEnd.start()
             }
 
             ParallelAnimation {
@@ -170,39 +189,115 @@ Item {
             }
             ColumnLayout {
                 anchors.fill:parent
+                RowLayout {
+                    Layout.fillWidth:true
+                    Layout.preferredHeight:50
+                    Layout.alignment:Qt.AlignTop
 
-                Rectangle {
-                    id: rect_
+                    Label  {
+                        text:window_.userName
+                        horizontalAlignment:Text.AlignHCenter
+                        verticalAlignment:Text.AlignVCenter
+                        font.pixelSize:17
+                    }
 
+                    Loader {
+                        Layout.preferredHeight:10
+                        Layout.fillWidth:true
+                    }
+                }
+                ListView {
+                    signal adjustMessageItemSize()
+                    model:message_model
                     Layout.fillWidth:true
                     Layout.fillHeight:true
-                    color :window_.bg_color.length <=0?"transparent":window_.bg_color
-                    RowLayout {
-                        width:parent.width
-                        height:45
-                        anchors.top:parent.top
-                        ImageLoader {
-                            id:chatwindow_userhead
-                            width:40
-                            height:40
-                            imageWidth:40
-                            imageHeight:40
-                            isFromData:true
-                            isRoundImage:true
-                            windowDpi:global.windowDpi
+                    clip:true
+                    id:message_list
+                    spacing:10
+                    antialiasing:true
+                    smooth:true
+                    // verticalLayoutDirection: ListView.BottomToTop
+                    delegate:ChatMessageDelegate {
+                        id:message_delegate
+                        message:userMessage
+                        direction:itemDirection
+                        userHeadData:userHead
+                        Component.onCompleted: {
+                            message_delegate.ListView.view.adjustMessageItemSize.connect(message_delegate.wrapText)
                         }
-                        Label  {
-                            text:window_.userName
+
+                    }
+                    onWidthChanged: {
+                        message_list.adjustMessageItemSize()
+                    }
+                }
+
+                ScrollView {
+                    Layout.preferredHeight:130
+                    Layout.fillWidth:true
+                    TextArea {
+                        id:textarea_
+                        width:parent.width
+                        height:130
+                        focus:true
+                        placeholderText:"Enter Your Mesasge..."
+                        smooth:true
+                        antialiasing:true
+                        wrapMode: TextArea.WrapAnywhere
+                        font.pixelSize:14
+                        Keys.onReturnPressed:event=> {
+                            if(textarea_.text.length  <=0)
+                                return;
+                            if(event.modifiers && Qt.ControlModifier) {
+                                text += '\n'
+                                textarea_.cursorPosition = textarea_.length
+                            }
+                            else {
+                                window_.addMySendTextMessage(textarea_.text)
+                                textarea_.clear();
+                            }
+                        }
+                        background:Rectangle {
+                            color:"transparent"
+                            anchors.fill:parent
+                        }
+
+                    }
+
+                }
+                RowLayout {
+                    Layout.fillWidth:true
+                    Layout.preferredHeight:30
+                    Layout.bottomMargin:10
+                    Loader {
+                        Layout.fillWidth:true
+                        Layout.preferredHeight:1
+                    }
+                    Rectangle {
+                        radius:7
+                        color:"#58C7B5"
+                        Layout.preferredHeight:parent.height
+                        Layout.preferredWidth:80
+                        Label {
+                            text:"发送"
                             horizontalAlignment:Text.AlignHCenter
                             verticalAlignment:Text.AlignVCenter
+                            color:"white"
                             font.pixelSize:14
-                        }
-                        Loader {
-                            Layout.fillHeight:true
-                            Layout.fillWidth:true
+                            anchors.centerIn:parent
                         }
                     }
                 }
+            }
+
+            ListModel {
+                id:message_model
+            }
+            Timer {
+                id:scrollEnd
+                interval:10
+                onTriggered:
+                    message_list.positionViewAtIndex(message_list.count - 1, ListView.Beginning)
             }
         }
     }
