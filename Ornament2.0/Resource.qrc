@@ -1,0 +1,51 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Resource/font/PICOSC Harmony Manrope-VF.ttf</file>
+        <file>Resource/ico/IconamoonClose.png</file>
+        <file>Resource/ico/MajesticonsEyeOff.png</file>
+        <file>Resource/ico/MajesticonsLock.png</file>
+        <file>Resource/ico/MingcuteUser2Fill.png</file>
+        <file>Resource/ico/TablerBrandUnity.png</file>
+        <file>Resource/ico/IconamoonArrowDown2Bold.png</file>
+        <file>Resource/ico/IconamoonArrowUp2Bold.png</file>
+        <file>Resource/ico/MingcuteMinimizeLine.png</file>
+        <file>Resource/ico/FluentMaximize16Regular.png</file>
+        <file>Resource/ico/TwemojiGreenCircle.png</file>
+        <file>Resource/ico/TwemojiRedCircle.png</file>
+        <file>Resource/ico/RiNotification3Line.png</file>
+        <file>Resource/ico/RiSearchLine.png</file>
+        <file>Resource/ico/RiMessage3Fill.png</file>
+        <file>Resource/ico/RiMessage3Line.png</file>
+        <file>Resource/ico/TablerBrandUnity_empty.png</file>
+        <file>Resource/ico/IconamoonSearch.png</file>
+        <file>Resource/ico/correct.png</file>
+        <file>Resource/ico/fail.png</file>
+        <file>Resource/ico/message_selected.png</file>
+        <file>Resource/ico/message_unselected.png</file>
+        <file>Resource/ico/friend_selected.png</file>
+        <file>Resource/ico/friend_unselected.png</file>
+        <file>Resource/ico/friend_select_white.png</file>
+        <file>Resource/ico/message_select_white.png</file>
+        <file>Resource/ico/friend_edit_sel.png</file>
+        <file>Resource/ico/friend_edit_unsel.png</file>
+        <file>Resource/ico/emoji_sel.png</file>
+        <file>Resource/ico/emoji_unsel.png</file>
+        <file>Resource/ico/file_sel.png</file>
+        <file>Resource/ico/file_unsel.png</file>
+        <file>Resource/ico/exe.png</file>
+        <file>Resource/font/flache.ttf</file>
+        <file>Resource/ico/mp3.png</file>
+        <file>Resource/ico/photo.png</file>
+        <file>Resource/ico/wait_trans_sel.png</file>
+        <file>Resource/ico/wait_trans_unsel.png</file>
+        <file>Resource/ico/save_image.png</file>
+        <file>Resource/ico/LsiconRotationLeftOutline.png</file>
+        <file>Resource/ico/LsiconRotationRightOutline.png</file>
+        <file>Resource/emoji/a-aimujingpeijingyangwasejingyabiaoqingxiaolian.png</file>
+        <file>Resource/emoji/a-aiqingxihuansebiaoqingxiaolian.png</file>
+        <file>Resource/emoji/a-aixihuanliukoushuisebiaoqingxiaolian.png</file>
+        <file>Resource/emoji/a-baochitaiduobiaoqingxiaolian.png</file>
+        <file>Resource/emoji/a-bizuigangabiaoqingxiaolian.png</file>
+        <file>Resource/emoji/a-gangaliuhanbiaoqingxiaolian.png</file>
+    </qresource>
+</RCC>
